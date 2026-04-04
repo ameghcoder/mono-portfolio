@@ -60,13 +60,78 @@ export const PORTFOLIO_DATA: PortfolioData = {
     location: "Rajasthan, India / Remote",
     availability: "Available for high-impact engineering roles",
     email: "mintuser65@gmail.com",
-    resume:
-      "https://docs.google.com/document/d/1ylZ9VDIYun6N5o0oD1ixMI2ZL2P4DSCv7vUOqx5Fg3w/edit?usp=sharing",
+    resume: "https://docs.google.com/document/d/1iF_eRrJdFLTWHE0vuzUMElzyc7VQyWfSZRs8iLpOOec/edit?usp=sharing",
     avatar: "/yrjdev.jpg",
   },
   calendarUrl: "dojo-agency/founder-mvp-website-clarity-call",
   repoUrl: "https://github.com/ameghcoder/mono-portfolio",
   projects: [
+    {
+      slug: "creatorjot",
+      title: "CreatorJot",
+      type: "AI Content Pipeline for YouTube Content Repurpose",
+      description:
+        "An AI-powered pipeline that repurposes YouTube content into platform-ready assets using a custom transcript segmentation algorithm and distributed job orchestration.",
+      fullContent: {
+        overview:
+          "Designed and built an end-to-end AI content repurposing system that extracts high-signal angles from YouTube transcripts and generates hooks, summaries, and key moments tailored to each platform.",
+        challenge:
+          "LLMs collapsed JSON structure, fabricated timestamps, and missed extraction targets when processing long-form transcripts — requiring a principled approach to prompt engineering and output validation.",
+        solution:
+          "Designed a custom 'Transcript Checkpoints' algorithm that partitions transcripts into discrete segments, each scored 1–10 by the model for relevance, automatically selecting the highest-signal angle. Paired with a pg-boss distributed job pipeline enforcing forbidden phrases, verbatim evidence usage, and platform-specific formatting constraints.",
+        tech: [
+          "Next.js 15",
+          "TypeScript",
+          "Express 5",
+          "Supabase",
+          "PostgreSQL",
+          "pg-boss",
+          "Gemini AI",
+          "Claude AI",
+          "Railway",
+          "Supabase Realtime",
+          "SSE",
+        ],
+        impact: [
+          "97+ Lighthouse score across multi-service Railway deployment",
+          "5 independent nodes: API, workers, frontend",
+          "Real-time progress tracking via Supabase Realtime/SSE",
+          "Structural prompt constraints eliminating JSON collapse and timestamp fabrication",
+          "Concurrent AI transcript extraction and content generation via distributed job pipeline",
+        ],
+        links: {
+          live: "https://creatorjot.com",
+        },
+      },
+    },
+    {
+      slug: "flowforge",
+      title: "FlowForge",
+      type: "Node Abstraction Layer for Composable AI Workflows",
+      description:
+        "A config-driven orchestration system for building composable AI workflows, where all node types are defined as JSON and rendered by a single universal controller.",
+      fullContent: {
+        overview:
+          "FlowForge is a data-driven node abstraction layer that eliminates per-node component boilerplate by defining all node types as JSON config rendered through a single universal NodeController.",
+        challenge:
+          "Traditional node-based workflow builders require per-node React components, creating scaling friction as new node types are added and making runtime extensibility difficult.",
+        solution:
+          "Engineered a type-based field registry (registerField/getField) mapping field type strings to React components at runtime, so new field types plug in without touching rendering logic. Dynamic ReactFlow handle generation auto-spawns input handles as users type {{variable}} syntax, parsed via regex diff against prior textarea state.",
+        tech: [
+          "JavaScript",
+          "React",
+          "ReactFlow",
+          "Zustand",
+          "Tailwind CSS",
+        ],
+        impact: [
+          "Zero per-node component boilerplate via universal NodeController",
+          "Runtime-extensible field registry — new field types require no rendering changes",
+          "Dynamic handle generation from {{variable}} syntax via regex diff parsing",
+        ],
+        links: {},
+      },
+    },
     {
       slug: "pixearn",
       title: "PixEarn",

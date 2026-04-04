@@ -2,7 +2,7 @@
 
 import { PORTFOLIO_DATA } from "@/data/portfolio";
 import { motion } from "framer-motion";
-import { FileDown } from "lucide-react";
+import { UserCircle2 } from "lucide-react";
 
 export function ResumeButton() {
     return (
@@ -17,8 +17,8 @@ export function ResumeButton() {
                 target="_blank"
                 className="flex items-center gap-3 bg-white text-black px-6 py-3 rounded-full font-mono text-xs sm:text-sm font-bold uppercase tracking-widest shadow-2xl hover:scale-105 active:scale-95 transition-all group"
             >
-                <FileDown size={14} className="group-hover:translate-y-0.5 transition-transform" />
-                Get My Resume
+                <UserCircle2 size={14} className="group-hover:translate-y-0.5 transition-transform" />
+                Hire Me
             </a>
         </motion.div>
     );
