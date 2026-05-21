@@ -1,19 +1,28 @@
+export interface ProjectLinks {
+  live?: string;
+  github?: string;
+  npm?: string;
+}
+
 export interface Project {
   slug: string;
   title: string;
   type: string;
   description: string;
+  // Homepage listing fields (present on featured projects)
+  index?: string;
+  metric?: string;
+  tags: string[];
+  featured: boolean;
+  openSource: boolean;
+  // Detail page content
   fullContent: {
     overview: string;
     challenge: string;
     solution: string;
     tech: string[];
     impact: string[];
-    links: {
-      live?: string;
-      github?: string;
-      npm?: string;
-    };
+    links: ProjectLinks;
   };
 }
 
@@ -21,50 +30,87 @@ export interface Experience {
   company: string;
   role: string;
   period: string;
-  description: string[];
+  metric: string;
+}
+
+export interface CurrentlyBuilding {
+  title: string;
+  label: string;
+  description: string;
+  tags: string[];
+}
+
+export interface ProofStat {
+  value: string;
+  label: string;
 }
 
 export interface PortfolioData {
   profile: {
     name: string;
     role: string;
+    headline: string;
     bio: string;
     location: string;
     availability: string;
     email: string;
     resume: string;
     avatar: string;
+    calendarUrl: string;
+    repoUrl: string;
   };
-  calendarUrl: string;
-  repoUrl: string;
+  currentlyBuilding: CurrentlyBuilding[];
+  proofStrip: ProofStat[];
   projects: Project[];
-  skills: {
-    category: string;
-    items: string[];
-  }[];
   experience: Experience[];
-  achievements: string[];
-  education: {
-    degree: string;
-    institution: string;
-    period: string;
+  socials: {
+    label: string;
+    url: string;
+    icon: "linkedin" | "github" | "twitter";
   }[];
-  socials: { label: string; url: string }[];
 }
 
 export const PORTFOLIO_DATA: PortfolioData = {
   profile: {
     name: "Yashraj Yadav",
-    role: "Full-Stack Developer | Next.js • TypeScript • System Design",
-    bio: "Full-Stack Developer with 4+ years of experience building production web applications serving 45,000+ monthly users. Expert in system architecture, database optimization, and high-performance engineering.",
+    role: "AI Engineer & Full-Stack Developer",
+    headline:
+      "I build AI-powered systems and production infrastructure for SaaS teams — from architecture to deployment.",
+    bio: "4+ years building production systems. 45,000+ monthly users. I own the full stack.",
     location: "Rajasthan, India / Remote",
-    availability: "Available for high-impact engineering roles",
+    availability: "// AVAILABLE FOR RETAINER & PROJECTS",
     email: "mintuser65@gmail.com",
-    resume: "https://docs.google.com/document/d/1iF_eRrJdFLTWHE0vuzUMElzyc7VQyWfSZRs8iLpOOec/edit?usp=sharing",
+    resume:
+      "https://docs.google.com/document/d/1iF_eRrJdFLTWHE0vuzUMElzyc7VQyWfSZRs8iLpOOec/edit?usp=sharing",
     avatar: "/yrjdev.jpg",
+    calendarUrl: "https://cal.com/yrjdev/let-s-talk-about-your-stack",
+    repoUrl: "https://github.com/ameghcoder/mono-portfolio",
   },
-  calendarUrl: "dojo-agency/founder-mvp-website-clarity-call",
-  repoUrl: "https://github.com/ameghcoder/mono-portfolio",
+
+  currentlyBuilding: [
+    {
+      title: "SupportIQ",
+      label: "IN BUILD",
+      description:
+        "AI support widget that auto-crawls your site and answers user questions. Zero manual setup.",
+      tags: ["RAG", "Multi-model routing", "Drop-in widget"],
+    },
+    {
+      title: "Cliy",
+      label: "IN BUILD",
+      description:
+        "Component registry infrastructure for AI agents. Verified assembly over generation.",
+      tags: ["AST extraction", "pgvector", "Agent SDK"],
+    },
+  ],
+
+  proofStrip: [
+    { value: "50k+", label: "Monthly Users" },
+    { value: "4.3M+", label: "Image Impressions" },
+    { value: "1.2M+", label: "Monthly Queries" },
+    { value: "4+", label: "Open Source Packages" },
+  ],
+
   projects: [
     {
       slug: "creatorjot",
@@ -72,6 +118,11 @@ export const PORTFOLIO_DATA: PortfolioData = {
       type: "AI Content Pipeline for YouTube Content Repurpose",
       description:
         "An AI-powered pipeline that repurposes YouTube content into platform-ready assets using a custom transcript segmentation algorithm and distributed job orchestration.",
+      featured: true,
+      openSource: false,
+      index: "01",
+      metric: "97+ Lighthouse score across multi-service Railway deployment",
+      tags: ["Next.js 15", "pg-boss", "Gemini AI"],
       fullContent: {
         overview:
           "Designed and built an end-to-end AI content repurposing system that extracts high-signal angles from YouTube transcripts and generates hooks, summaries, and key moments tailored to each platform.",
@@ -110,6 +161,12 @@ export const PORTFOLIO_DATA: PortfolioData = {
       type: "Node Abstraction Layer for Composable AI Workflows",
       description:
         "A config-driven orchestration system for building composable AI workflows, where all node types are defined as JSON and rendered by a single universal controller.",
+      featured: true,
+      openSource: false,
+      index: "02",
+      metric:
+        "Zero per-node component boilerplate via universal NodeController",
+      tags: ["ReactFlow", "Zustand", "Runtime registry"],
       fullContent: {
         overview:
           "FlowForge is a data-driven node abstraction layer that eliminates per-node component boilerplate by defining all node types as JSON config rendered through a single universal NodeController.",
@@ -117,13 +174,7 @@ export const PORTFOLIO_DATA: PortfolioData = {
           "Traditional node-based workflow builders require per-node React components, creating scaling friction as new node types are added and making runtime extensibility difficult.",
         solution:
           "Engineered a type-based field registry (registerField/getField) mapping field type strings to React components at runtime, so new field types plug in without touching rendering logic. Dynamic ReactFlow handle generation auto-spawns input handles as users type {{variable}} syntax, parsed via regex diff against prior textarea state.",
-        tech: [
-          "JavaScript",
-          "React",
-          "ReactFlow",
-          "Zustand",
-          "Tailwind CSS",
-        ],
+        tech: ["JavaScript", "React", "ReactFlow", "Zustand", "Tailwind CSS"],
         impact: [
           "Zero per-node component boilerplate via universal NodeController",
           "Runtime-extensible field registry — new field types require no rendering changes",
@@ -138,9 +189,14 @@ export const PORTFOLIO_DATA: PortfolioData = {
       type: "Creator Monetization Platform",
       description:
         "A production-grade platform serving 45,000+ Monthly Views & 19,000+ Monthly Active Users with real-time analytics, revenue distribution and more.",
+      featured: true,
+      openSource: false,
+      index: "03",
+      metric: "1.2M+ monthly queries at <150ms avg response",
+      tags: ["Next.js", "Supabase", "PostgreSQL"],
       fullContent: {
         overview:
-          "Designed and deployed a creator platform handling 1.2M+ queries monthly with <100-150ms average response time.",
+          "Designed and deployed a creator platform handling 1.2M+ queries monthly with <100–150ms average response time.",
         challenge:
           "Built and scaled real-time impression and engagement analytics, handling high-concurrency database traffic while enforcing row-level security with PostgreSQL RLS.",
         solution:
@@ -161,7 +217,7 @@ export const PORTFOLIO_DATA: PortfolioData = {
           "19,000+ Monthly Active Users",
           "1.2M+ Monthly Queries",
           "98+ Lighthouse Performance Score",
-          "1200+ Creators Joined",
+          "1,200+ Creators Joined",
         ],
         links: {
           live: "https://pixearn.com",
@@ -174,6 +230,9 @@ export const PORTFOLIO_DATA: PortfolioData = {
       type: "Component Registry CLI",
       description:
         "Automated registry generation engine for modern UI libraries, bridging the gap between source and discovery.",
+      featured: false,
+      openSource: true,
+      tags: ["Node.js", "TypeScript", "ts-morph"],
       fullContent: {
         overview:
           "A CLI tool for generating component registries compatible with shadcn/ui CLI, automating registry.json creation.",
@@ -200,6 +259,9 @@ export const PORTFOLIO_DATA: PortfolioData = {
       type: "Structured Table Language",
       description:
         "Framework-agnostic DSL for building clean, interactive tables with schema-driven architecture.",
+      featured: false,
+      openSource: true,
+      tags: ["TypeScript", "Node.js", "DSL"],
       fullContent: {
         overview:
           "A domain-specific language that converts STL syntax to structured JSON for programmatic table generation.",
@@ -226,6 +288,9 @@ export const PORTFOLIO_DATA: PortfolioData = {
       type: "Sanity CMS Plugin",
       description:
         "A Sanity Studio plugin that enables content creators to author complex, flexible tables using Structured Table Language (STL) with live preview support.",
+      featured: false,
+      openSource: true,
+      tags: ["TypeScript", "Sanity Studio", "React"],
       fullContent: {
         overview:
           "A Sanity Studio plugin that introduces a dedicated STL editor and live preview for building complex tables beyond the limitations of standard Portable Text tables. Table data is stored as raw STL strings and rendered using the structured-table core package.",
@@ -259,6 +324,9 @@ export const PORTFOLIO_DATA: PortfolioData = {
       type: "Smart Component Library",
       description:
         "Intelligent UI kit built on top of shadcn/ui with state-aware components and automated adaptation.",
+      featured: false,
+      openSource: true,
+      tags: ["Next.js", "Turborepo", "shadcn/ui"],
       fullContent: {
         overview:
           "A premium UI library featuring an interactive component preview system and custom registry integration.",
@@ -285,90 +353,31 @@ export const PORTFOLIO_DATA: PortfolioData = {
       },
     },
   ],
-  skills: [
-    {
-      category: "Frontend Development",
-      items: [
-        "React",
-        "Next.js (App & Pages)",
-        "TypeScript",
-        "Zustand",
-        "Tailwind CSS",
-        "Framer Motion",
-      ],
-    },
-    {
-      category: "Backend & Database",
-      items: [
-        "Node.js",
-        "Express.js",
-        "PostgreSQL",
-        "Supabase (RLS, Auth)",
-        "Database Modeling",
-        "RESTful API Design",
-      ],
-    },
-    {
-      category: "DevOps & Systems",
-      items: [
-        "Turborepo",
-        "PNPM",
-        "Docker (Basic)",
-        "GitHub Actions (CI/CD)",
-        "CLI Development",
-        "Linux/Unix",
-      ],
-    },
-  ],
+
   experience: [
     {
       company: "Vidharat Marketing",
       role: "Senior Full-Stack Developer",
       period: "Mar 2024 — Dec 2024",
-      description: [
-        "Led rebuild of e-commerce platform serving 10k+ products, improving conversion by 25%.",
-        "Integrated AR-based virtual try-on and 3D visualization, increasing engagement by 40%.",
-        "Built a custom product search engine handling 5k+ concurrent users with <200ms response time.",
-        "Optimized SEO scores to 95+ resulting in 150% increase in organic traffic.",
-      ],
-    },
-    {
-      company: "Empowering Tomorrow",
-      role: "Full-Stack Developer",
-      period: "Mar 2024 — Present",
-      description: [
-        "Developed donation-enabled fundraising platform with integrated Razorpay/Stripe payments.",
-        "Achieved 92+ Lighthouse score and increased donor retention by 30% through performance tuning.",
-        "Improved donation conversion funnel by 35% via cross-functional collaboration on UX.",
-      ],
+      metric:
+        "150% increase in organic traffic via 95+ SEO scores across 10k+ product catalog",
     },
     {
       company: "Ashiv Diamonds",
       role: "Full-Stack Developer",
       period: "Oct 2022 — Apr 2023",
-      description: [
-        "Revamped product catalog with 2,000+ listings and an advanced multi-filter system.",
-        "Reduced page load time by 70% (from 8s to 2.4s) via WebP conversion and CDN implementation.",
-        "Built custom CMS admin panel for staff to manage 100+ product updates monthly.",
-      ],
+      metric:
+        "70% reduction in page load time (8s → 2.4s) for 2,000+ product catalog",
     },
   ],
-  achievements: [
-    "Scaled PixEarn to 45,000+ monthly views, 19,000+ monthly active users, 1.2M+ monthly queries and 1,200+ creators.",
-    "Published 4+ npm packages and open-source CLI tools with 1,500+ downloads.",
-    "Consistently maintain 95+ performance scores across all production applications.",
-    "Shipped multiple production systems independently from concept to full deployment.",
-  ],
-  education: [
-    {
-      degree: "Higher Secondary (Physics/Mathematics)",
-      institution: "Aditya Institute, Alwar",
-      period: "Scored: 85%",
-    },
-  ],
+
   socials: [
-    { label: "LinkedIn", url: "https://linkedin.com/in/yrjdeveloper" },
-    { label: "GitHub", url: "https://github.com/ameghcoder" },
-    { label: "Twitter", url: "https://x.com/yrjdev" },
+    {
+      label: "LinkedIn",
+      url: "https://linkedin.com/in/yrjdeveloper",
+      icon: "linkedin",
+    },
+    { label: "GitHub", url: "https://github.com/ameghcoder", icon: "github" },
+    { label: "Twitter", url: "https://x.com/yrjdev", icon: "twitter" },
   ],
 };

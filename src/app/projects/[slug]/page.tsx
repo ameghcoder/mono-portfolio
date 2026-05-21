@@ -1,159 +1,189 @@
 import { PORTFOLIO_DATA } from "@/data/portfolio";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, Github, Terminal, Globe, Cpu } from "lucide-react";
+import { ArrowLeft, Github, Globe, Terminal } from "lucide-react";
+import type { Metadata } from "next";
 
-export default async function ProjectPage({ params }: { params: Promise<{ slug: string }> }) {
-    const { slug } = await params;
+export async function generateStaticParams() {
+  return PORTFOLIO_DATA.projects.map((p) => ({ slug: p.slug }));
+}
 
-    const project = PORTFOLIO_DATA.projects.find((p) => p.slug === slug);
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const project = PORTFOLIO_DATA.projects.find((p) => p.slug === slug);
+  if (!project) return {};
+  return {
+    title: `${project.title} — ${PORTFOLIO_DATA.profile.name}`,
+    description: project.description,
+  };
+}
 
-    if (!project) {
-        notFound();
-    }
+export default async function ProjectPage({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = await params;
+  const project = PORTFOLIO_DATA.projects.find((p) => p.slug === slug);
+  if (!project) notFound();
 
-    return (
-        <div className="max-container py-20 animate-in fade-in slide-in-from-bottom-4 duration-700">
-            {/* Editorial Header */}
-            <header className="space-y-12 mb-20">
-                <Link
-                    href="/"
-                    className="group inline-flex items-center gap-3 text-[10px] font-mono text-noir-muted uppercase tracking-[0.3em] hover:text-white transition-colors"
-                >
-                    <ArrowLeft size={14} className="transition-transform group-hover:-translate-x-1" />
-                    RETURN_TO_INDEX
-                </Link>
+  const { fullContent } = project;
 
-                <div className="space-y-8">
-                    <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
-                        <div className="space-y-4">
-                            <span className="badge-type block w-fit border-noir-border text-[10px] opacity-60">
-                                {project.type.toUpperCase()}
-                            </span>
-                            <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight text-white/95">
-                                {project.title}
-                            </h1>
-                        </div>
+  return (
+    <div className="max-container py-16 space-y-14">
+      {/* Back link */}
+      <Link
+        href="/#systems"
+        className="group inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground hover:text-foreground transition-colors duration-200"
+      >
+        <ArrowLeft size={12} className="transition-transform duration-200 group-hover:-translate-x-1" />
+        Back
+      </Link>
 
-                        <div className="flex gap-4">
-                            {project.fullContent.links.live && (
-                                <a href={project.fullContent.links.live} target="_blank" className="p-3 border border-noir-border hover:border-white transition-colors group">
-                                    <Globe size={18} className="text-noir-muted group-hover:text-white" />
-                                </a>
-                            )}
-                            {project.fullContent.links.github && (
-                                <a href={project.fullContent.links.github} target="_blank" className="p-3 border border-noir-border hover:border-white transition-colors group">
-                                    <Github size={18} className="text-noir-muted group-hover:text-white" />
-                                </a>
-                            )}
-                            {project.fullContent.links.npm && (
-                                <a href={project.fullContent.links.npm} target="_blank" className="p-3 border border-noir-border hover:border-white transition-colors group">
-                                    <Terminal size={18} className="text-noir-muted group-hover:text-white" />
-                                </a>
-                            )}
-                        </div>
-                    </div>
-                </div>
-            </header>
+      {/* Header */}
+      <header className="space-y-5">
+        <span className="label-mono">{project.type}</span>
+        <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-6">
+          <div className="space-y-3">
+            <h1 className="text-4xl md:text-5xl font-medium tracking-tight text-foreground leading-[1.05]">
+              {project.title}
+            </h1>
+            <p className="text-base text-muted-foreground leading-relaxed max-w-lg">
+              {project.description}
+            </p>
+          </div>
 
-            <div className="divider mb-20" />
+          <div className="flex gap-2 shrink-0">
+            {fullContent.links.live && (
+              <a
+                href={fullContent.links.live}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Live site"
+                className="p-2.5 border border-border text-muted-foreground hover:text-foreground hover:border-foreground transition-colors duration-200"
+              >
+                <Globe size={15} />
+              </a>
+            )}
+            {fullContent.links.github && (
+              <a
+                href={fullContent.links.github}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="GitHub"
+                className="p-2.5 border border-border text-muted-foreground hover:text-foreground hover:border-foreground transition-colors duration-200"
+              >
+                <Github size={15} />
+              </a>
+            )}
+            {fullContent.links.npm && (
+              <a
+                href={fullContent.links.npm}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="npm package"
+                className="p-2.5 border border-border text-muted-foreground hover:text-foreground hover:border-foreground transition-colors duration-200"
+              >
+                <Terminal size={15} />
+              </a>
+            )}
+          </div>
+        </div>
+      </header>
 
-            {/* Structured Content Grid */}
-            <div className="grid gap-20 lg:grid-cols-[1fr_300px]">
-                <main className="space-y-24">
-                    <section className="space-y-6">
-                        <h2 className="text-[10px] font-mono text-noir-muted uppercase tracking-[0.4em] border-l-2 border-noir-border pl-4">
-                            01 // Overview
-                        </h2>
-                        <p className="text-xl md:text-2xl leading-relaxed text-white/90 font-light italic">
-                            &quot;{project.fullContent.overview}&quot;
-                        </p>
-                    </section>
+      <div className="divider" />
 
-                    <section className="space-y-12">
-                        <div className="grid gap-12 md:grid-cols-2">
-                            <div className="space-y-6">
-                                <h2 className="text-[10px] font-mono text-noir-muted uppercase tracking-[0.4em] border-l-2 border-noir-border pl-4">
-                                    02 // The Challenge
-                                </h2>
-                                <p className="text-base text-noir-muted leading-relaxed">
-                                    {project.fullContent.challenge}
-                                </p>
-                            </div>
-                            <div className="space-y-6">
-                                <h2 className="text-[10px] font-mono text-noir-muted uppercase tracking-[0.4em] border-l-2 border-noir-border pl-4">
-                                    03 // The Solution
-                                </h2>
-                                <p className="text-base text-noir-muted leading-relaxed">
-                                    {project.fullContent.solution}
-                                </p>
-                            </div>
-                        </div>
-                    </section>
-                </main>
+      {/* Content + sidebar */}
+      <div className="grid md:grid-cols-[1fr_220px] gap-14 items-start">
+        <div className="space-y-12">
+          {/* Overview */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-3">
+              <span className="section-index">[01]</span>
+              <span className="label-mono">Overview</span>
+            </div>
+            <p className="text-base text-foreground leading-relaxed opacity-80">
+              {fullContent.overview}
+            </p>
+          </div>
 
-                {/* Technical Sidebar */}
-                <aside className="space-y-16">
-                    <div className="space-y-8 p-8 border border-noir-border bg-noir-surface/5">
-                        <div className="space-y-6">
-                            <h3 className="text-[10px] font-mono text-noir-muted uppercase tracking-[0.4em] flex items-center gap-2">
-                                <Cpu size={12} /> Tech_Stack
-                            </h3>
-                            <ul className="flex flex-wrap gap-2">
-                                {project.fullContent.tech.map((t) => (
-                                    <li key={t} className="text-[10px] font-mono border border-noir-border px-2 py-1 text-white/60">
-                                        {t.toUpperCase()}
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
+          <div className="divider" />
 
-                        <div className="divider opacity-75" />
-
-                        <div className="space-y-6">
-                            <h3 className="text-[10px] font-mono text-noir-muted uppercase tracking-[0.4em]">
-                                Impact_Metrics
-                            </h3>
-                            <ul className="space-y-4">
-                                {project.fullContent.impact.map((i) => (
-                                    <li key={i} className="space-y-1">
-                                        <span className="text-[9px] font-mono text-noir-muted uppercase block opacity-40">System_Result</span>
-                                        <span className="text-xs font-bold text-white tracking-widest">{i}</span>
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
-                    </div>
-
-                    <div className="space-y-6 px-4">
-                        <h3 className="text-[10px] font-mono text-noir-muted uppercase tracking-[0.4em]">
-                            Documentation
-                        </h3>
-                        <div className="space-y-4">
-                            <p className="text-[11px] text-noir-muted leading-relaxed italic">
-                                Architectural patterns and system logs are kept in a separate secure repository. Contact for full technical documentation.
-                            </p>
-                        </div>
-                    </div>
-                </aside>
+          {/* Challenge + Solution */}
+          <div className="grid md:grid-cols-2 gap-10">
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <span className="section-index">[02]</span>
+                <span className="label-mono">Challenge</span>
+              </div>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                {fullContent.challenge}
+              </p>
             </div>
 
-            {/* Editorial Navigation Footer */}
-            <footer className="mt-40 pt-16 border-t border-noir-border">
-                <div className="flex flex-col md:flex-row justify-between items-center gap-8">
-                    <Link
-                        href="/"
-                        className="editorial-link text-[10px] font-mono uppercase tracking-[0.3em] flex items-center gap-3"
-                    >
-                        <ArrowLeft size={14} />
-                        BACK_TO_CENTRAL_LOG
-                    </Link>
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <span className="section-index">[03]</span>
+                <span className="label-mono">Solution</span>
+              </div>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                {fullContent.solution}
+              </p>
+            </div>
+          </div>
 
-                    <div className="text-[9px] font-mono text-noir-muted uppercase tracking-[0.3em] opacity-40">
-                        {project.title} {"//"} ARCHITECTURE_V{project.slug.length}.0
-                    </div>
-                </div>
-            </footer>
+          <div className="divider" />
+
+          {/* Impact */}
+          <div className="space-y-5">
+            <div className="flex items-center gap-3">
+              <span className="section-index">[04]</span>
+              <span className="label-mono">Impact</span>
+            </div>
+            <ul className="space-y-3">
+              {fullContent.impact.map((item, i) => (
+                <li
+                  key={i}
+                  className="flex items-start gap-3 text-sm text-foreground leading-relaxed"
+                >
+                  <span className="text-highlight shrink-0 font-mono mt-0.5">→</span>
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
-    );
+
+        {/* Sidebar */}
+        <aside className="md:sticky md:top-20 space-y-5">
+          <div className="border border-border p-5 space-y-4 bg-card">
+            <span className="label-mono">Tech Stack</span>
+            <div className="flex flex-wrap gap-2">
+              {fullContent.tech.map((t) => (
+                <span key={t} className="tag">{t}</span>
+              ))}
+            </div>
+          </div>
+
+          <p className="text-[11px] font-mono text-muted-foreground leading-relaxed px-1">
+            Full architecture docs available on request.
+          </p>
+        </aside>
+      </div>
+
+      <div className="pt-6 border-t border-border">
+        <Link
+          href="/#systems"
+          className="group inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground hover:text-foreground transition-colors duration-200"
+        >
+          <ArrowLeft size={12} className="transition-transform duration-200 group-hover:-translate-x-1" />
+          Back to work
+        </Link>
+      </div>
+    </div>
+  );
 }
