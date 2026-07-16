@@ -17,8 +17,14 @@ export async function generateMetadata({
   const project = PORTFOLIO_DATA.projects.find((p) => p.slug === slug);
   if (!project) return {};
   return {
-    title: `${project.title} — ${PORTFOLIO_DATA.profile.name}`,
+    title: project.title,
     description: project.description,
+    alternates: { canonical: `/projects/${slug}` },
+    openGraph: {
+      title: project.title,
+      description: project.description,
+      type: "article",
+    },
   };
 }
 

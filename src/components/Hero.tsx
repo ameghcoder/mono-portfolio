@@ -71,14 +71,14 @@ export function Hero() {
           <Link href="/#systems" className="btn-primary">
             See My Work
           </Link>
-          <Link href="/retainer" className="btn-ghost">
-            View Retainer
+          <Link href="/blog" className="btn-ghost">
+            Read Blogs
           </Link>
         </div>
       </div>
 
       {/* Bio */}
-      <p className="text-base text-foreground leading-relaxed max-w-md opacity-90">
+      <p className="text-base text-foreground leading-relaxed max-w-xl opacity-90">
         {headline}
       </p>
 
@@ -101,8 +101,8 @@ export function Hero() {
         <Link href="/#systems" className="btn-primary">
           See My Work
         </Link>
-        <Link href="/retainer" className="btn-ghost">
-          View Retainer
+        <Link href="/blog" className="btn-ghost">
+          Read the Blog
         </Link>
       </div>
     </section>

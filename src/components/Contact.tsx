@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { PORTFOLIO_DATA } from "@/data/portfolio";
 
 export const icons = {
@@ -23,23 +22,12 @@ export function Contact() {
   return (
     <section id="contact" className="space-y-8 scroll-mt-20">
       <div className="flex items-center gap-4">
-        <span className="section-index">[07]</span>
+        <span className="section-index">[06]</span>
         <span className="label-mono">Get in Touch</span>
       </div>
 
       <div className="space-y-px border border-border bg-border">
-        <div className="bg-background p-8 grid md:grid-cols-2 gap-10">
-          {/* Retainer */}
-          <div className="space-y-4">
-            <h3 className="text-base font-medium text-foreground">
-              Start a retainer
-            </h3>
-            <p className="label-mono">Currently taking 1–2 clients.</p>
-            <Link href="/retainer" className="btn-primary w-fit">
-              View Retainer Page →
-            </Link>
-          </div>
-
+        <div className="bg-background p-8">
           {/* Direct contact */}
           <div className="space-y-4">
             <h3 className="text-base font-medium text-foreground">

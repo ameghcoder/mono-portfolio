@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { ThemeToggle } from "./ThemeToggle";
 
 interface NavLink {
   label: string;
@@ -15,9 +16,8 @@ const links: NavLink[] = [
   { label: "Work", href: "/#systems", sectionId: "systems", hideOnMobile: true },
   { label: "OSS", href: "/#open-source", sectionId: "open-source", hideOnMobile: true },
   { label: "Building", href: "/#currently-building", sectionId: "currently-building", hideOnMobile: true },
-  { label: "Skills", href: "/#skills", sectionId: "skills", hideOnMobile: true },
-  { label: "Experience", href: "/#experience", sectionId: "experience", hideOnMobile: true },
-  { label: "Retainer", href: "/retainer" },
+  { label: "About", href: "/about" },
+  { label: "Blog", href: "/blog" },
   { label: "Contact", href: "/#contact", sectionId: "contact" },
 ];
 
@@ -59,11 +59,15 @@ export function Nav() {
   }, [pathname]);
 
   return (
-    <header className="sticky top-0 z-50 bg-background/85 backdrop-blur-sm">
-      <div className="max-container flex items-center justify-center h-11">
+    <header className="sticky top-0 z-50 bg-background/85 backdrop-blur-sm border-b border-border-dim">
+      <div className="max-container flex items-center justify-between h-11">
+        {/* Spacer balances the theme toggle so nav links stay centred */}
+        <span className="w-7 shrink-0" aria-hidden="true" />
         <nav className="flex items-center gap-5 md:gap-7">
           {links.map(({ label, href, sectionId, hideOnMobile }) => {
-            const isPageActive = href === "/retainer" && pathname === "/retainer";
+            const isPageActive =
+              (href === "/blog" || href === "/about") &&
+              pathname.startsWith(href);
             const isSectionActive =
               sectionId !== undefined &&
               activeSection === sectionId &&
@@ -88,6 +92,7 @@ export function Nav() {
             );
           })}
         </nav>
+        <ThemeToggle />
       </div>
     </header>
   );

@@ -12,7 +12,8 @@ const HIGHLIGHT = "#E68A47";
 const BORDER = "#4F4F4F";
 
 export default async function OGImage() {
-  const { name, role, headline } = PORTFOLIO_DATA.profile;
+  // Use the concise bio (not the long headline) so it fits the OG card.
+  const { name, role, bio } = PORTFOLIO_DATA.profile;
 
   return new ImageResponse(
     (
@@ -96,7 +97,7 @@ export default async function OGImage() {
             maxWidth: 900,
           }}
         >
-          {headline}
+          {bio}
         </div>
 
         {/* Spacer */}
@@ -125,7 +126,7 @@ export default async function OGImage() {
               background: "#5BC272",
             }}
           />
-          <span>Available for retainer &amp; projects</span>
+          <span>Available for projects &amp; collaborations</span>
           <div style={{ flex: 1, display: "flex" }} />
           <span style={{ color: HIGHLIGHT }}>yrjdev.dev</span>
         </div>

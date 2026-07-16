@@ -1,12 +1,9 @@
 import { Hero } from "@/components/Hero";
-import { ProofStrip } from "@/components/ProofStrip";
-import { RecentShips } from "@/components/RecentShips";
-import { Architecture } from "@/components/Architecture";
+import { WhatIBuild } from "@/components/WhatIBuild";
 import { SelectedSystems } from "@/components/SelectedSystems";
 import { OpenSource } from "@/components/OpenSource";
 import { CurrentlyBuilding } from "@/components/CurrentlyBuilding";
-import { Skills } from "@/components/Skills";
-import { Experience } from "@/components/Experience";
+import { HowIThink, WhatMakesDifferent } from "@/components/Narrative";
 import { Contact } from "@/components/Contact";
 import { Footer } from "@/components/Footer";
 
@@ -14,21 +11,17 @@ export default function Home() {
   return (
     <div className="max-container pt-4 pb-12 space-y-20">
       <Hero />
-      <ProofStrip />
+      <WhatIBuild />
       <div className="divider" />
-      <RecentShips />
-      <div className="divider" />
-      <Architecture />
+      <CurrentlyBuilding />
       <div className="divider" />
       <SelectedSystems />
       <div className="divider" />
       <OpenSource />
       <div className="divider" />
-      <CurrentlyBuilding />
+      <HowIThink />
       <div className="divider" />
-      <Skills />
-      <div className="divider" />
-      <Experience />
+      <WhatMakesDifferent />
       <div className="divider" />
       <Contact />
       <Footer />

@@ -4,11 +4,11 @@ export function CurrentlyBuilding() {
   return (
     <section id="currently-building" className="space-y-8 scroll-mt-20">
       <div className="flex items-center gap-4">
-        <span className="section-index">[04]</span>
+        <span className="section-index">[01]</span>
         <span className="label-mono">Currently Building</span>
       </div>
 
-      <div className="grid md:grid-cols-2 gap-4">
+      <div className="grid gap-4">
         {PORTFOLIO_DATA.currentlyBuilding.map((item) => (
           <div
             key={item.title}

@@ -40,9 +40,9 @@ export interface CurrentlyBuilding {
   tags: string[];
 }
 
-export interface ProofStat {
-  value: string;
-  label: string;
+export interface ExpertiseArea {
+  area: string;
+  skills: string[];
 }
 
 export interface PortfolioData {
@@ -59,8 +59,19 @@ export interface PortfolioData {
     calendarUrl: string;
     repoUrl: string;
   };
+  /** Short capability phrases for the homepage "What I build" strip. */
+  capabilities: string[];
+  /** Homepage narrative — "How I Think" (paragraphs). */
+  howIThink: string[];
+  /** Homepage narrative — "What Makes Me Different" (paragraphs). */
+  whatMakesDifferent: string[];
+  /** Long intro paragraph for the /about page. */
+  intro: string;
+  /** Full "What I Build" list for the /about page. */
+  whatIBuild: string[];
+  /** Categorized technical expertise for the /about page. */
+  expertise: ExpertiseArea[];
   currentlyBuilding: CurrentlyBuilding[];
-  proofStrip: ProofStat[];
   projects: Project[];
   experience: Experience[];
   socials: {
@@ -75,10 +86,10 @@ export const PORTFOLIO_DATA: PortfolioData = {
     name: "Yashraj Yadav",
     role: "AI Engineer & Full-Stack Developer",
     headline:
-      "I build AI-powered systems and production infrastructure for SaaS teams — from architecture to deployment.",
+      "AI Engineer, Full-Stack Developer, and System Designer building production-ready AI products end to end — scalable architectures, distributed backends, RAG pipelines, and developer tooling. I turn complex problems into simple, reliable systems built to evolve.",
     bio: "4+ years building production systems. 45,000+ monthly users. I own the full stack.",
     location: "Rajasthan, India / Remote",
-    availability: "// AVAILABLE FOR RETAINER & PROJECTS",
+    availability: "// AVAILABLE FOR PROJECTS & COLLABORATIONS",
     email: "mintuser65@gmail.com",
     resume:
       "https://docs.google.com/document/d/1iF_eRrJdFLTWHE0vuzUMElzyc7VQyWfSZRs8iLpOOec/edit?usp=sharing",
@@ -87,28 +98,133 @@ export const PORTFOLIO_DATA: PortfolioData = {
     repoUrl: "https://github.com/ameghcoder/mono-portfolio",
   },
 
-  currentlyBuilding: [
+  capabilities: [
+    "AI-Powered SaaS",
+    "RAG & Retrieval Systems",
+    "Distributed Backends",
+    "Queue-Based Architectures",
+    "Developer Tools & CLIs",
+    "Creator Platforms",
+  ],
+
+  howIThink: [
+    "I don't build features first. I design systems.",
+    "Every project starts by understanding the problem, identifying bottlenecks, and creating an architecture that can survive future growth instead of just today's requirements. I prefer modular systems, clear boundaries, schema-driven design, event-driven workflows, and infrastructure that scales without becoming difficult to maintain.",
+    "Whether it's an AI product, a developer tool, or a SaaS platform, I optimize for simplicity, reliability, and long-term maintainability over short-term hacks.",
+  ],
+
+  whatMakesDifferent: [
+    "I don't consider myself just a frontend or backend engineer. I enjoy solving difficult engineering problems by designing systems that remain understandable years later.",
+    "I think deeply about architecture before implementation, optimize for maintainability over cleverness, and build software that scales without requiring complete rewrites. My interests sit at the intersection of AI engineering, backend systems, developer experience, and product architecture — where software becomes a platform rather than just an application.",
+  ],
+
+  intro:
+    "I'm an AI Engineer, Full-Stack Developer, and System Designer focused on building production-ready AI products from the ground up. I design scalable architectures, distributed backend systems, RAG pipelines, intelligent developer tooling, and creator platforms that solve real-world problems. My work spans the entire stack — from system architecture, databases, APIs, background workers, queues, and infrastructure to intuitive user experiences and deployment. I've built AI content pipelines, creator monetization platforms, open-source developer tools, component registries, and retrieval systems, while shipping products used by thousands of users and serving millions of requests. I enjoy breaking complex problems into simple, maintainable systems that are fast, reliable, and built to evolve over time.",
+
+  whatIBuild: [
+    "AI-powered SaaS products",
+    "Retrieval-Augmented Generation (RAG) systems",
+    "Agent workflows & multi-model AI pipelines",
+    "Distributed background job systems",
+    "Queue-based architectures",
+    "API-first backend platforms",
+    "Production PostgreSQL & Supabase infrastructure",
+    "Creator economy platforms",
+    "Open-source developer tools",
+    "Component registries & CLIs",
+    "Schema-driven frameworks",
+    "Modern full-stack web applications",
+    "Internal developer platforms",
+    "High-performance data pipelines",
+  ],
+
+  expertise: [
     {
-      title: "SupportIQ",
-      label: "IN BUILD",
-      description:
-        "AI support widget that auto-crawls your site and answers user questions. Zero manual setup.",
-      tags: ["RAG", "Multi-model routing", "Drop-in widget"],
+      area: "AI Engineering",
+      skills: [
+        "Production RAG architectures",
+        "AI content generation pipelines",
+        "Multi-model routing",
+        "Prompt engineering",
+        "AI workflow orchestration",
+        "Embedding pipelines",
+        "Semantic search",
+        "LLM integrations",
+        "Knowledge indexing",
+        "Retrieval optimization",
+      ],
     },
     {
-      title: "Cliy",
-      label: "IN BUILD",
-      description:
-        "Component registry infrastructure for AI agents. Verified assembly over generation.",
-      tags: ["AST extraction", "pgvector", "Agent SDK"],
+      area: "Backend Engineering",
+      skills: [
+        "Node.js",
+        "Python",
+        "TypeScript",
+        "Express",
+        "REST APIs",
+        "Background Workers",
+        "Queue Systems (pg-boss)",
+        "PostgreSQL",
+        "Supabase",
+        "Database schema design",
+        "Authentication systems",
+        "Real-time (SSE / WebSockets)",
+        "File processing pipelines",
+        "Edge Functions",
+      ],
+    },
+    {
+      area: "System Design",
+      skills: [
+        "Distributed architecture",
+        "Event-driven systems",
+        "Modular monoliths",
+        "API architecture",
+        "Scalable infrastructure",
+        "Workflow orchestration",
+        "Schema-driven systems",
+        "Runtime registries",
+        "Domain modeling",
+        "Caching strategies",
+        "Performance optimization",
+      ],
+    },
+    {
+      area: "Frontend",
+      skills: [
+        "Next.js",
+        "React",
+        "TypeScript",
+        "Tailwind CSS",
+        "React Flow",
+        "Zustand",
+        "MDX",
+        "Design systems",
+        "Component architecture",
+      ],
+    },
+    {
+      area: "Infrastructure",
+      skills: [
+        "Railway",
+        "Docker",
+        "Supabase",
+        "PostgreSQL",
+        "CI/CD",
+        "Multi-service deployments",
+        "Environment management",
+      ],
     },
   ],
 
-  proofStrip: [
-    { value: "50k+", label: "Monthly Users" },
-    { value: "4.3M+", label: "Image Impressions" },
-    { value: "1.2M+", label: "Monthly Queries" },
-    { value: "4+", label: "Open Source Packages" },
+  currentlyBuilding: [
+    {
+      title: "SupportGPT",
+      label: "IN BUILD",
+      description:
+        "An AI customer support platform that automatically crawls websites, builds a knowledge base, and answers customer questions through an advanced RAG pipeline — automated ingestion, semantic indexing, intelligent retrieval, and multi-model routing that eliminates manual documentation setup.",
+      tags: ["RAG", "Multi-model routing", "Semantic indexing"],
+    },
   ],
 
   projects: [
