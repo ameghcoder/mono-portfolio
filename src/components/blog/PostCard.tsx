@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Layers } from "lucide-react";
 import { formatDate, type PostMeta } from "@/lib/blog-types";
 
@@ -8,6 +9,18 @@ export function PostCard({ post }: { post: PostMeta }) {
       href={`/blog/${post.slug}`}
       className="group block bg-background hover:bg-card transition-colors duration-200 p-6"
     >
+      {post.coverImage && (
+        <div className="relative mb-4 aspect-[1.91/1] w-full overflow-hidden rounded-lg border border-border">
+          <Image
+            src={post.coverImage}
+            alt={post.coverImageCaption ?? post.title}
+            fill
+            sizes="(min-width: 1024px) 720px, 100vw"
+            className="object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+          />
+        </div>
+      )}
+
       <div className="flex items-center gap-3 flex-wrap mb-3">
         <span className="font-mono text-[10px] uppercase tracking-[0.1em] text-highlight">
           {post.category}
