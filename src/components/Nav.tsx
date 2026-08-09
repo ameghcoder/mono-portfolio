@@ -9,13 +9,12 @@ interface NavLink {
   label: string;
   href: string;
   sectionId?: string;
-  hideOnMobile?: boolean;
 }
 
 const links: NavLink[] = [
-  { label: "Work", href: "/#systems", sectionId: "systems", hideOnMobile: true },
-  { label: "OSS", href: "/#open-source", sectionId: "open-source", hideOnMobile: true },
-  { label: "Building", href: "/#currently-building", sectionId: "currently-building", hideOnMobile: true },
+  { label: "Work", href: "/#systems", sectionId: "systems" },
+  { label: "OSS", href: "/#open-source", sectionId: "open-source" },
+  { label: "Building", href: "/#currently-building", sectionId: "currently-building" },
   { label: "About", href: "/about" },
   { label: "Blog", href: "/blog" },
   { label: "Contact", href: "/#contact", sectionId: "contact" },
@@ -58,42 +57,47 @@ export function Nav() {
     return () => observer.disconnect();
   }, [pathname]);
 
-  return (
-    <header className="sticky top-0 z-50 bg-background/85 backdrop-blur-sm border-b border-border-dim">
-      <div className="max-container flex items-center justify-between h-11">
-        {/* Spacer balances the theme toggle so nav links stay centred */}
-        <span className="w-7 shrink-0" aria-hidden="true" />
-        <nav className="flex items-center gap-5 md:gap-7">
-          {links.map(({ label, href, sectionId, hideOnMobile }) => {
-            const isPageActive =
-              (href === "/blog" || href === "/about") &&
-              pathname.startsWith(href);
-            const isSectionActive =
-              sectionId !== undefined &&
-              activeSection === sectionId &&
-              pathname === "/";
-            const isActive = isPageActive || isSectionActive;
+  function isActiveLink({ href, sectionId }: NavLink): boolean {
+    const isPageActive =
+      (href === "/blog" || href === "/about") && pathname.startsWith(href);
+    const isSectionActive =
+      sectionId !== undefined && activeSection === sectionId && pathname === "/";
+    return isPageActive || isSectionActive;
+  }
 
-            return (
-              <Link
-                key={label}
-                href={href}
-                aria-current={isActive ? "page" : undefined}
-                className={[
-                  "font-mono text-[11px] uppercase tracking-widest transition-colors duration-200",
-                  hideOnMobile ? "hidden md:inline" : "",
-                  isActive
-                    ? "text-highlight"
-                    : "text-muted-foreground hover:text-foreground",
-                ].join(" ")}
-              >
-                {label}
-              </Link>
-            );
-          })}
-        </nav>
-        <ThemeToggle />
-      </div>
+  return (
+    <header className="max-container flex items-center justify-between pt-10 pb-8">
+      <Link
+        href="/"
+        aria-label="Home"
+        className="flex items-center justify-center size-7 shrink-0 rounded-md border border-border font-mono text-[11px] font-semibold text-foreground hover:border-highlight hover:text-highlight transition-colors duration-200"
+      >
+        Y
+      </Link>
+
+      {/* Primary nav — full link set on desktop; mobile uses the fixed BottomTabBar instead */}
+      <nav aria-label="Primary" className="hidden md:flex items-center gap-7">
+        {links.map((link) => {
+          const isActive = isActiveLink(link);
+          return (
+            <Link
+              key={link.label}
+              href={link.href}
+              aria-current={isActive ? "page" : undefined}
+              className={[
+                "font-mono text-[11px] uppercase tracking-widest transition-colors duration-200",
+                isActive
+                  ? "text-highlight"
+                  : "text-muted-foreground hover:text-foreground",
+              ].join(" ")}
+            >
+              {link.label}
+            </Link>
+          );
+        })}
+      </nav>
+
+      <ThemeToggle />
     </header>
   );
 }
