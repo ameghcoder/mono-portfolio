@@ -20,6 +20,12 @@ export function generateStaticParams() {
   return getAllPosts().map((p) => ({ slug: p.slug }));
 }
 
+/** Absolute URL for a post's cover image, or null if it doesn't have one. */
+function absoluteCoverUrl(coverImage?: string): string | null {
+  if (!coverImage) return null;
+  return `${SITE_URL}${coverImage.startsWith("/") ? coverImage : `/${coverImage}`}`;
+}
+
 export async function generateMetadata({
   params,
 }: {
@@ -29,6 +35,18 @@ export async function generateMetadata({
   const post = getPostBySlug(slug);
   if (!post) return {};
   const url = `${SITE_URL}/blog/${post.slug}`;
+  const coverImageUrl = absoluteCoverUrl(post.coverImage);
+  const ogImages = coverImageUrl
+    ? [
+        {
+          url: coverImageUrl,
+          width: post.coverImageW ?? 1200,
+          height: post.coverImageH ?? 630,
+          alt: post.coverImageCaption ?? post.title,
+        },
+      ]
+    : undefined;
+
   return {
     title: post.title,
     description: post.summary,
@@ -45,12 +63,14 @@ export async function generateMetadata({
       authors: [AUTHOR.name],
       section: post.category,
       tags: post.tags,
+      images: ogImages,
     },
     twitter: {
       card: "summary_large_image",
       title: post.title,
       description: post.summary,
       creator: "@yrjdev",
+      images: ogImages,
     },
   };
 }
@@ -66,8 +86,7 @@ export default async function PostPage({
 
   const series = getSeriesNav(post);
   const url = `${SITE_URL}/blog/${post.slug}`;
-  const coverImageUrl = post.coverImage ? `${SITE_URL}${post.coverImage?.startsWith("/") ? post.coverImage : `/${post.coverImage}`}` : null;
-
+  const coverImageUrl = absoluteCoverUrl(post.coverImage);
 
   // schema.org BlogPosting — the primary structured-data signal for Google rich
   // results and for LLMs deciding how to attribute/cite this post.
@@ -90,11 +109,11 @@ export default async function PostPage({
         "representativeOfPage": true,
         "width": {
           "@type": "QuantitativeValue",
-          "value": post.coverImageW && 1200
+          "value": post.coverImageW ?? 1200
         },
         "height": {
           "@type": "QuantitativeValue",
-          "value": post.coverImageH && 630
+          "value": post.coverImageH ?? 630
         }
       }
     }),
