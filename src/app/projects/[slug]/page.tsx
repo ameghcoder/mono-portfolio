@@ -1,8 +1,11 @@
 import { PORTFOLIO_DATA } from "@/data/portfolio";
+import { getPostBySlug } from "@/lib/blog";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, Github, Globe, Terminal } from "lucide-react";
+import { ArrowLeft, ArrowRight, Github, Globe, Terminal } from "lucide-react";
 import type { Metadata } from "next";
+import { ArchitectureViewer } from "@/components/ArchitectureViewer";
+import { DecisionRecord } from "@/components/projects/DecisionRecord";
 
 export async function generateStaticParams() {
   return PORTFOLIO_DATA.projects.map((p) => ({ slug: p.slug }));
@@ -38,6 +41,22 @@ export default async function ProjectPage({
   if (!project) notFound();
 
   const { fullContent } = project;
+  const relatedArticle = project.relatedArticleSlug
+    ? getPostBySlug(project.relatedArticleSlug)
+    : undefined;
+
+  const featured = PORTFOLIO_DATA.projects.filter((p) => p.featured);
+  const currentIndex = featured.findIndex((p) => p.slug === project.slug);
+  const nextProject =
+    currentIndex === -1 ? undefined : featured[(currentIndex + 1) % featured.length];
+
+  const sections = [
+    { id: "overview", label: "Overview" },
+    ...(project.architecture ? [{ id: "architecture", label: "Architecture" }] : []),
+    ...(project.decisions?.length ? [{ id: "decisions", label: "Decisions" }] : []),
+    { id: "impact", label: "Impact" },
+    ...(relatedArticle ? [{ id: "writing", label: "Writing" }] : []),
+  ];
 
   return (
     <div className="max-container py-16 space-y-14">
@@ -52,7 +71,18 @@ export default async function ProjectPage({
 
       {/* Header */}
       <header className="space-y-5">
-        <span className="label-mono">{project.type}</span>
+        <div className="flex items-center gap-3 flex-wrap">
+          <span className="label-mono">{project.type}</span>
+          {project.status && (
+            <>
+              <span className="text-border-dim" aria-hidden="true">·</span>
+              <span className="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.1em] text-muted-foreground">
+                <span className="size-1.5 rounded-full bg-success shrink-0" aria-hidden="true" />
+                {project.status}
+              </span>
+            </>
+          )}
+        </div>
         <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-6">
           <div className="space-y-3">
             <h1 className="text-4xl md:text-5xl font-medium tracking-tight text-foreground leading-[1.05]">
@@ -101,13 +131,23 @@ export default async function ProjectPage({
         </div>
       </header>
 
-      <div className="divider" />
+      {/* Contextual nav — only sections that exist */}
+      <nav
+        aria-label="Sections"
+        className="flex flex-wrap gap-x-6 gap-y-2 py-3 border-y border-border-dim font-mono text-[10px] uppercase tracking-[0.1em] text-muted-foreground"
+      >
+        {sections.map((s) => (
+          <a key={s.id} href={`#${s.id}`} className="hover:text-foreground transition-colors duration-200">
+            {s.label}
+          </a>
+        ))}
+      </nav>
 
       {/* Content + sidebar */}
       <div className="grid md:grid-cols-[1fr_220px] gap-14 items-start">
-        <div className="space-y-12">
+        <div className="space-y-14">
           {/* Overview */}
-          <div className="space-y-4">
+          <div id="overview" className="space-y-4 scroll-mt-24">
             <div className="flex items-center gap-3">
               <span className="section-index">[01]</span>
               <span className="label-mono">Overview</span>
@@ -115,37 +155,59 @@ export default async function ProjectPage({
             <p className="text-base text-foreground leading-relaxed opacity-80">
               {fullContent.overview}
             </p>
+
+            <div className="grid md:grid-cols-2 gap-10 pt-2">
+              <div className="space-y-2">
+                <span className="label-mono">Challenge</span>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  {fullContent.challenge}
+                </p>
+              </div>
+              <div className="space-y-2">
+                <span className="label-mono">Solution</span>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  {fullContent.solution}
+                </p>
+              </div>
+            </div>
           </div>
 
-          <div className="divider" />
-
-          {/* Challenge + Solution */}
-          <div className="grid md:grid-cols-2 gap-10">
-            <div className="space-y-4">
+          {/* Architecture */}
+          {project.architecture && (
+            <div id="architecture" className="space-y-4 scroll-mt-24">
               <div className="flex items-center gap-3">
                 <span className="section-index">[02]</span>
-                <span className="label-mono">Challenge</span>
+                <span className="label-mono">Architecture</span>
               </div>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                {fullContent.challenge}
-              </p>
+              <ArchitectureViewer
+                source={project.architecture}
+                title={`${project.slug} — architecture.mmd`}
+                caption={
+                  <span className="font-mono text-[10px] uppercase tracking-[0.1em] text-muted-foreground">
+                    Click to zoom · drag to pan
+                  </span>
+                }
+              />
             </div>
+          )}
 
-            <div className="space-y-4">
+          {/* Decisions */}
+          {project.decisions && project.decisions.length > 0 && (
+            <div id="decisions" className="space-y-4 scroll-mt-24">
               <div className="flex items-center gap-3">
                 <span className="section-index">[03]</span>
-                <span className="label-mono">Solution</span>
+                <span className="label-mono">Decisions</span>
               </div>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                {fullContent.solution}
-              </p>
+              <div className="space-y-px">
+                {project.decisions.map((d) => (
+                  <DecisionRecord key={d.title} decision={d} />
+                ))}
+              </div>
             </div>
-          </div>
-
-          <div className="divider" />
+          )}
 
           {/* Impact */}
-          <div className="space-y-5">
+          <div id="impact" className="space-y-5 scroll-mt-24">
             <div className="flex items-center gap-3">
               <span className="section-index">[04]</span>
               <span className="label-mono">Impact</span>
@@ -162,6 +224,28 @@ export default async function ProjectPage({
               ))}
             </ul>
           </div>
+
+          {/* Related writing */}
+          {relatedArticle && (
+            <div id="writing" className="space-y-4 scroll-mt-24">
+              <div className="flex items-center gap-3">
+                <span className="section-index">[05]</span>
+                <span className="label-mono">Writing</span>
+              </div>
+              <Link
+                href={`/blog/${relatedArticle.slug}`}
+                className="group block border border-border p-5 hover:border-highlight transition-colors duration-200"
+              >
+                <span className="label-mono">Related article</span>
+                <h3 className="text-base font-medium text-foreground mt-2 group-hover:text-highlight transition-colors duration-200">
+                  {relatedArticle.title}
+                </h3>
+                <p className="text-sm text-muted-foreground leading-relaxed mt-1">
+                  {relatedArticle.summary}
+                </p>
+              </Link>
+            </div>
+          )}
         </div>
 
         {/* Sidebar */}
@@ -174,14 +258,11 @@ export default async function ProjectPage({
               ))}
             </div>
           </div>
-
-          <p className="text-[11px] font-mono text-muted-foreground leading-relaxed px-1">
-            Full architecture docs available on request.
-          </p>
         </aside>
       </div>
 
-      <div className="pt-6 border-t border-border">
+      {/* Footer nav */}
+      <div className="pt-6 border-t border-border flex items-center justify-between gap-4">
         <Link
           href="/#systems"
           className="group inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground hover:text-foreground transition-colors duration-200"
@@ -189,6 +270,16 @@ export default async function ProjectPage({
           <ArrowLeft size={12} className="transition-transform duration-200 group-hover:-translate-x-1" />
           Back to work
         </Link>
+
+        {nextProject && (
+          <Link
+            href={`/projects/${nextProject.slug}`}
+            className="group inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground hover:text-foreground transition-colors duration-200"
+          >
+            Next — {nextProject.title}
+            <ArrowRight size={12} className="transition-transform duration-200 group-hover:translate-x-1" />
+          </Link>
+        )}
       </div>
     </div>
   );

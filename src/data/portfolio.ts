@@ -4,6 +4,18 @@ export interface ProjectLinks {
   npm?: string;
 }
 
+/** A single design decision, restructured from real overview/challenge/solution
+ * copy — never invented. `alternatives` is only set when the prior/rejected
+ * approach is explicitly stated in that project's real content. */
+export interface Decision {
+  title: string;
+  why: string;
+  approach: string;
+  alternatives?: string;
+  tradeoff?: string;
+  outcome?: string;
+}
+
 export interface Project {
   slug: string;
   title: string;
@@ -15,6 +27,13 @@ export interface Project {
   tags: string[];
   featured: boolean;
   openSource: boolean;
+  /** Only set when directly observable (e.g. a live link exists) — omit rather than guess. */
+  status?: string;
+  /** Mermaid source for the project's real architecture — omit if not documented yet. */
+  architecture?: string;
+  decisions?: Decision[];
+  /** Blog post slug this project is directly discussed in, if any (bidirectional cross-link). */
+  relatedArticleSlug?: string;
   // Detail page content
   fullContent: {
     overview: string;
@@ -86,7 +105,7 @@ export const PORTFOLIO_DATA: PortfolioData = {
     name: "Yashraj Yadav",
     role: "AI Engineer & Full-Stack Developer",
     headline:
-      "AI Engineer, Full-Stack Developer, and System Designer building production-ready AI products end to end — scalable architectures, distributed backends, RAG pipelines, and developer tooling. I turn complex problems into simple, reliable systems built to evolve.",
+      "AI Engineer and Full-Stack Developer building production-ready AI products end to end. I turn complexity into simple, reliable systems.",
     bio: "4+ years building production systems. 45,000+ monthly users. I own the full stack.",
     location: "Rajasthan, India / Remote",
     availability: "// AVAILABLE FOR PROJECTS & COLLABORATIONS",
@@ -239,6 +258,114 @@ export const PORTFOLIO_DATA: PortfolioData = {
       index: "01",
       metric: "97+ Lighthouse score across multi-service Railway deployment",
       tags: ["Next.js 15", "pg-boss", "Gemini AI"],
+      status: "Live",
+      // TODO(architecture): source is the real production diagram, kept in
+      // sync manually — update here if the system changes.
+      architecture: `flowchart TB
+    %% CLIENT LAYER
+    Client["Client App<br/>Web / Dashboard / API Consumer"]
+
+    %% API SERVER
+    subgraph API["API Server - Express + TypeScript"]
+        direction TB
+
+        Routes["Routes Layer<br/>video.route.ts<br/>jobs.route.ts<br/>health.route.ts"]
+
+        Middleware["Middleware<br/>Auth JWT<br/>Rate Limit<br/>Validation<br/>Error Handler"]
+
+        JobService["JobManagementService"]
+
+        QueueManager["QueueManager<br/>pg-boss Wrapper"]
+
+        NotificationService["NotificationService<br/>WebSocket → SSE → Email"]
+
+        Routes --> Middleware
+        Middleware --> JobService
+        JobService --> QueueManager
+    end
+
+    %% WORKERS
+    subgraph Workers["Background Workers"]
+        direction LR
+
+        TranscriptWorker["TranscriptWorker<br/>- Fetch Transcript<br/>- Store Transcript<br/>- Generate Summary<br/>- Update Database"]
+
+        GenerationWorker["GenerationWorker<br/>- Read Summary<br/>- Generate Content<br/>- Save Generations<br/>- Send Notifications"]
+    end
+
+    %% AI SERVICES
+    subgraph AI["AI Processing"]
+        direction TB
+
+        Gemini["Gemini AI<br/>Transcript Summary<br/>Key Points"]
+
+        Claude["Claude AI<br/>Platform Content Generation"]
+    end
+
+    %% STORAGE & DATABASE
+    subgraph Data["Supabase Infrastructure"]
+        direction TB
+
+        PostgreSQL["PostgreSQL Database<br/>Users<br/>Sessions<br/>Payloads<br/>Jobs<br/>Generations"]
+
+        Storage["Supabase Storage<br/>Transcript Files"]
+
+        PgBoss["pg-boss Queues<br/>transcript-queue<br/>generation-queue"]
+    end
+
+    %% FLOW
+    Client -->|"POST /api/v1/yt"| API
+
+    QueueManager --> PgBoss
+
+    PgBoss --> TranscriptWorker
+    PgBoss --> GenerationWorker
+
+    TranscriptWorker -->|"Fetch / Save"| Storage
+    TranscriptWorker -->|"Read / Write"| PostgreSQL
+    TranscriptWorker --> Gemini
+
+    GenerationWorker -->|"Read / Write"| PostgreSQL
+    GenerationWorker --> Claude
+    GenerationWorker --> NotificationService
+
+    NotificationService --> Client
+
+    %% STYLING
+    classDef api fill:#1e293b,stroke:#94a3b8,color:#ffffff
+    classDef worker fill:#0f766e,stroke:#5eead4,color:#ffffff
+    classDef ai fill:#7c3aed,stroke:#c4b5fd,color:#ffffff
+    classDef data fill:#92400e,stroke:#fcd34d,color:#ffffff
+    classDef client fill:#111827,stroke:#9ca3af,color:#ffffff
+
+    class API,Routes,Middleware,JobService,QueueManager,NotificationService api
+    class Workers,TranscriptWorker,GenerationWorker worker
+    class AI,Gemini,Claude ai
+    class Data,PostgreSQL,Storage,PgBoss data
+    class Client client
+`,
+      // TODO(experiments): no baseline->change->result data captured for this
+      // project yet — add here if/when a real experiment is run.
+      decisions: [
+        {
+          title: "Score-and-select transcript segmentation over single-pass prompting",
+          why: "Full-transcript prompting collapsed JSON structure, fabricated timestamps, and missed extraction targets on long-form input.",
+          alternatives: "A single prompt over the entire transcript",
+          approach:
+            "The 'Transcript Checkpoints' algorithm partitions transcripts into discrete segments, each scored 1–10 by the model for relevance, automatically selecting the highest-signal angle.",
+          tradeoff:
+            "Adds a scoring/selection pass and more pipeline complexity than a single call.",
+          outcome: "In production — structural prompt constraints eliminated JSON collapse and timestamp fabrication.",
+        },
+        {
+          title: "Distributed pg-boss job pipeline over inline request handling",
+          why: "AI transcript extraction and content generation run long enough that handling them inline would block API responses.",
+          approach:
+            "A pg-boss distributed job pipeline separates the API, transcript workers, and generation workers into independent processes, with progress reported back over Supabase Realtime/SSE.",
+          tradeoff: "5 independent services to deploy and operate instead of one.",
+          outcome: "97+ Lighthouse score across the multi-service Railway deployment.",
+        },
+      ],
       fullContent: {
         overview:
           "Designed and built an end-to-end AI content repurposing system that extracts high-signal angles from YouTube transcripts and generates hooks, summaries, and key moments tailored to each platform.",
@@ -283,6 +410,49 @@ export const PORTFOLIO_DATA: PortfolioData = {
       metric:
         "Zero per-node component boilerplate via universal NodeController",
       tags: ["ReactFlow", "Zustand", "Runtime registry"],
+      // TODO(architecture): conservative diagram built from the described
+      // mechanics below — verify/expand with the real module boundaries.
+      architecture: `flowchart LR
+    Config["Node Config<br/>JSON Definition"]
+    Controller["NodeController<br/>Universal Renderer"]
+    Registry["Field Registry<br/>registerField / getField"]
+    Store["Zustand Store"]
+    Canvas["ReactFlow Canvas"]
+    Handles["Dynamic Handles<br/>{{variable}} regex diff"]
+
+    Config --> Controller
+    Controller --> Registry
+    Registry -->|resolves component| Controller
+    Controller --> Canvas
+    Canvas <--> Store
+    Controller --> Handles
+    Handles --> Canvas
+
+    classDef core fill:#1e293b,stroke:#94a3b8,color:#ffffff
+    classDef ui fill:#0f766e,stroke:#5eead4,color:#ffffff
+
+    class Config,Controller,Registry core
+    class Store,Canvas,Handles ui
+`,
+      // TODO(experiments): no baseline->change->result data captured for this
+      // project yet — add here if/when a real experiment is run.
+      decisions: [
+        {
+          title: "Type-based field registry over per-node components",
+          why: "Traditional node-based workflow builders require a React component per node type, creating scaling friction as new node types are added and making runtime extensibility difficult.",
+          alternatives: "A dedicated React component per node type",
+          approach:
+            "A field registry (registerField/getField) maps field type strings to React components at runtime, so new field types plug in without touching rendering logic.",
+          outcome: "Zero per-node component boilerplate via a single universal NodeController.",
+        },
+        {
+          title: "Regex-diff parsing for dynamic handle generation",
+          why: "Workflow nodes need input handles that update live as a user types template variables.",
+          approach:
+            "Dynamic ReactFlow handle generation auto-spawns input handles as users type {{variable}} syntax, parsed via regex diff against the prior textarea state.",
+          outcome: "Handles stay in sync with node config with no manual wiring.",
+        },
+      ],
       fullContent: {
         overview:
           "FlowForge is a data-driven node abstraction layer that eliminates per-node component boilerplate by defining all node types as JSON config rendered through a single universal NodeController.",
@@ -310,6 +480,50 @@ export const PORTFOLIO_DATA: PortfolioData = {
       index: "03",
       metric: "1.2M+ monthly queries at <150ms avg response",
       tags: ["Next.js", "Supabase", "PostgreSQL"],
+      status: "Live",
+      relatedArticleSlug: "i-had-the-index-my-postgres-query-was-still-timing-out",
+      // TODO(architecture): conservative diagram built from the stack
+      // described below — verify/expand with the real service boundaries.
+      architecture: `flowchart LR
+    Client["Client<br/>Creator / Viewer"]
+    Edge["Next.js<br/>Edge-Optimized SSR"]
+    API["API Routes<br/>Node.js"]
+    PG["PostgreSQL<br/>Row-Level Security + Custom Indexes"]
+    Sharp["Sharp Pipeline<br/>Image Processing"]
+    Storage["Supabase Storage"]
+
+    Client -->|request| Edge
+    Edge --> API
+    API -->|tenant-scoped queries| PG
+    API -->|upload| Sharp
+    Sharp --> Storage
+    PG -->|analytics reads| API
+    API -->|response| Client
+
+    classDef api fill:#1e293b,stroke:#94a3b8,color:#ffffff
+    classDef data fill:#92400e,stroke:#fcd34d,color:#ffffff
+    classDef client fill:#111827,stroke:#9ca3af,color:#ffffff
+
+    class Client client
+    class Edge,API api
+    class PG,Sharp,Storage data
+`,
+      // TODO(experiments): no baseline->change->result data captured for this
+      // project yet — add here if/when a real experiment is run.
+      decisions: [
+        {
+          title: "PostgreSQL row-level security for tenant isolation",
+          why: "High-concurrency creator/viewer traffic needed per-creator data isolation enforced consistently.",
+          approach: "PostgreSQL RLS policies enforce row-level access control alongside custom indexing for the analytics query paths.",
+          outcome: "1.2M+ monthly queries at <150ms avg response.",
+        },
+        {
+          title: "Sharp-driven image pipeline for storage cost",
+          why: "Storage costs scaled directly with creator uploads.",
+          approach: "A Sharp-based image processing pipeline handles uploads before they hit storage.",
+          outcome: "40% reduction in storage costs.",
+        },
+      ],
       fullContent: {
         overview:
           "Designed and deployed a creator platform handling 1.2M+ queries monthly with <100–150ms average response time.",

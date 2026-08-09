@@ -22,7 +22,7 @@ export function Contact() {
   return (
     <section id="contact" className="space-y-8 scroll-mt-20">
       <div className="flex items-center gap-4">
-        <span className="section-index">[06]</span>
+        <span className="section-index">[07]</span>
         <span className="label-mono">Get in Touch</span>
       </div>
 

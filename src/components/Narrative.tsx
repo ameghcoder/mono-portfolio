@@ -5,7 +5,7 @@ export function HowIThink() {
   return (
     <section id="how-i-think" className="space-y-6 scroll-mt-20">
       <div className="flex items-center gap-4">
-        <span className="section-index">[04]</span>
+        <span className="section-index">[05]</span>
         <span className="label-mono">How I Think</span>
       </div>
 
@@ -28,7 +28,7 @@ export function WhatMakesDifferent() {
   return (
     <section id="what-makes-me-different" className="space-y-6 scroll-mt-20">
       <div className="flex items-center gap-4">
-        <span className="section-index">[05]</span>
+        <span className="section-index">[06]</span>
         <span className="label-mono">What Makes Me Different</span>
       </div>
 

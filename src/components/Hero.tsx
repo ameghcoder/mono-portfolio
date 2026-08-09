@@ -8,44 +8,32 @@ import { icons } from "./Contact";
 const HANDLE = "@yrjdev";
 
 export function Hero() {
-  const { name, headline, location, availability, avatar } =
+  const { name, headline, bio, location, availability, avatar } =
     PORTFOLIO_DATA.profile;
 
   return (
-    <section className="space-y-5">
-      <div className="relative">
-        {/* Banner — edge-to-edge on mobile, container-width above */}
-        <div className="relative aspect-3/1 overflow-hidden bg-card">
-          <Image
-            src="/banner02.jpeg"
-            alt=""
-            fill
-            priority
-            sizes="(max-width: 1024px) 100vw, 720px"
-            className="object-cover rounded-xl z-0"
-          />
+    <section className="space-y-6">
+      {/* Identity row — avatar is the only photography; everything else is typographic */}
+      <div className="flex items-center gap-4">
+        <Image
+          src={avatar}
+          alt={name}
+          width={56}
+          height={56}
+          priority
+          className="rounded-full block size-14 object-cover border border-border shrink-0"
+        />
+        <div className="min-w-0">
+          <h1 className="text-2xl md:text-3xl font-medium tracking-tight text-foreground leading-tight">
+            {name}
+          </h1>
+          <p className="text-sm font-mono text-muted-foreground truncate">
+            {HANDLE}
+            <span className="opacity-40 px-2">·</span>
+            <TypewriterRole />
+          </p>
         </div>
-
-        {/* Avatar row — avatar overlaps banner, buttons sit top-right on md+ */}
-        <div className="flex items-end justify-between gap-4 absolute bottom-2 md:bottom-4 left-2 md:left-4">
-          <div className="shrink-0 rounded-lg border-8 border-background bg-background shadow-md">
-            <Image
-              src={avatar}
-              alt={name}
-              width={96}
-              height={96}
-              priority
-              className="rounded-lg block size-20 md:size-24 object-cover"
-            />
-          </div>
-
-        </div>
-      </div>
-
-      {/* Identity — name + handle/role */}
-      <div className="space-y-1 pt-1">
-        {/* Social links */}
-        <div className="flex items-center justify-end gap-5 pb-2">
+        <div className="hidden sm:flex items-center gap-5 ml-auto shrink-0">
           {PORTFOLIO_DATA.socials.map((social) => (
             <a
               key={social.label}
@@ -59,31 +47,18 @@ export function Hero() {
             </a>
           ))}
         </div>
-        <h1 className="text-2xl md:text-3xl font-medium tracking-tight text-foreground leading-tight">
-          {name}
-        </h1>
-        <p className="text-sm font-mono text-muted-foreground">
-          {HANDLE}
-          <span className="opacity-40 px-2">·</span>
-          <TypewriterRole />
-        </p>
-        <div className="hidden md:flex gap-2 mt-6">
-          <Link href="/#systems" className="btn-primary">
-            See My Work
-          </Link>
-          <Link href="/blog" className="btn-ghost">
-            Read Blogs
-          </Link>
-        </div>
       </div>
 
-      {/* Bio */}
-      <p className="text-base text-foreground leading-relaxed max-w-xl opacity-90">
+      {/* Positioning statement */}
+      <p className="text-sm text-muted-foreground leading-relaxed max-w-lg">
         {headline}
       </p>
 
+      {/* Short factual signal line */}
+      <p className="font-mono text-sm text-muted-foreground">{bio}</p>
+
       {/* Meta row — location · status */}
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 pt-1">
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
         <span className="inline-flex items-center gap-1.5 label-mono">
           <MapPin size={11} className="opacity-70" aria-hidden="true" />
           {location}
@@ -96,8 +71,24 @@ export function Hero() {
         </span>
       </div>
 
-      {/* Buttons — mobile only (desktop pair lives in the avatar row) */}
-      <div className="flex md:hidden flex-wrap gap-2 pt-3">
+      {/* Social links — mobile only (desktop pair lives in the identity row) */}
+      <div className="flex sm:hidden items-center gap-5">
+        {PORTFOLIO_DATA.socials.map((social) => (
+          <a
+            key={social.label}
+            href={social.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={social.label}
+            className="text-muted-foreground hover:text-foreground transition-colors duration-200"
+          >
+            {icons[social.icon]}
+          </a>
+        ))}
+      </div>
+
+      {/* CTAs */}
+      <div className="flex flex-wrap gap-2 pt-1">
         <Link href="/#systems" className="btn-primary">
           See My Work
         </Link>

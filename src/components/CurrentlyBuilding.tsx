@@ -4,7 +4,7 @@ export function CurrentlyBuilding() {
   return (
     <section id="currently-building" className="space-y-8 scroll-mt-20">
       <div className="flex items-center gap-4">
-        <span className="section-index">[01]</span>
+        <span className="section-index">[03]</span>
         <span className="label-mono">Currently Building</span>
       </div>
 

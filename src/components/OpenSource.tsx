@@ -9,7 +9,7 @@ export function OpenSource() {
     <section id="open-source" className="space-y-8 scroll-mt-20">
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-4">
-          <span className="section-index">[03]</span>
+          <span className="section-index">[04]</span>
           <span className="label-mono">Open Source</span>
         </div>
         <span className="label-mono">{oss.length} packages published</span>

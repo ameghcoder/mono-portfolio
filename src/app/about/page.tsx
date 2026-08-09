@@ -2,15 +2,12 @@ import type { Metadata } from "next";
 import { PORTFOLIO_DATA } from "@/data/portfolio";
 import { Expertise } from "@/components/Expertise";
 import { Experience } from "@/components/Experience";
-import { Architecture } from "@/components/Architecture";
 import { Footer } from "@/components/Footer";
-
 export const metadata: Metadata = {
   title: "About",
   description: PORTFOLIO_DATA.intro,
   alternates: { canonical: "/about" },
 };
-
 export default function AboutPage() {
   return (
     <div className="max-container pt-8 pb-16 space-y-16">
@@ -24,8 +21,6 @@ export default function AboutPage() {
           {PORTFOLIO_DATA.intro}
         </p>
       </header>
-
-      <div className="divider" />
 
       {/* What I Build */}
       <section id="what-i-build" className="space-y-8 scroll-mt-20">
@@ -46,21 +41,11 @@ export default function AboutPage() {
         </ul>
       </section>
 
-      <div className="divider" />
-
       {/* Technical Expertise */}
       <Expertise />
 
-      <div className="divider" />
-
       {/* Experience */}
       <Experience />
-
-      <div className="divider" />
-
-      {/* Sample Architecture */}
-      <Architecture />
-
       <Footer />
     </div>
   );
