@@ -15,7 +15,6 @@ import { Mdx } from "@/components/mdx/Mdx";
 import { Toc } from "@/components/blog/Toc";
 import { AskAI } from "@/components/blog/AskAI";
 import { Footer } from "@/components/Footer";
-import Image from "next/image";
 
 export function generateStaticParams() {
   return getAllPosts().map((p) => ({ slug: p.slug }));
@@ -205,8 +204,6 @@ export default async function PostPage({
           </ol>
         </div>
       )}
-
-      <div className="mt-10 divider" />
 
       {/* Article + TOC */}
       <div className="mt-10 grid lg:grid-cols-[minmax(0,720px)_200px] gap-12 items-start">

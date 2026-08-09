@@ -5,11 +5,11 @@ export const alt = `${PORTFOLIO_DATA.profile.name} — ${PORTFOLIO_DATA.profile.
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
-const BG = "#2B2B2B";
-const FG = "#F5F5F5";
-const MUTED = "#8C8C8C";
-const HIGHLIGHT = "#E68A47";
-const BORDER = "#4F4F4F";
+const BG = "#000000";
+const FG = "#f4f4f5"; // zinc-100
+const MUTED = "#a1a1aa"; // zinc-400
+const HIGHLIGHT = "#fafafa"; // zinc-50 — brightest neutral, no separate accent hue
+const BORDER = "#27272a"; // zinc-800
 
 export default async function OGImage() {
   // Use the concise bio (not the long headline) so it fits the OG card.
