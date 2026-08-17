@@ -73,7 +73,6 @@ export interface PortfolioData {
     location: string;
     availability: string;
     email: string;
-    resume: string;
     avatar: string;
     calendarUrl: string;
     repoUrl: string;
@@ -110,10 +109,8 @@ export const PORTFOLIO_DATA: PortfolioData = {
     location: "Rajasthan, India / Remote",
     availability: "// AVAILABLE FOR PROJECTS & COLLABORATIONS",
     email: "mintuser65@gmail.com",
-    resume:
-      "https://docs.google.com/document/d/1iF_eRrJdFLTWHE0vuzUMElzyc7VQyWfSZRs8iLpOOec/edit?usp=sharing",
     avatar: "/yrjdev.jpg",
-    calendarUrl: "https://cal.com/yrjdev/let-s-talk-about-your-stack",
+    calendarUrl: "https://cal.com/yrjdev/lets-discuss",
     repoUrl: "https://github.com/ameghcoder/mono-portfolio",
   },
 
@@ -348,22 +345,27 @@ export const PORTFOLIO_DATA: PortfolioData = {
       // project yet — add here if/when a real experiment is run.
       decisions: [
         {
-          title: "Score-and-select transcript segmentation over single-pass prompting",
+          title:
+            "Score-and-select transcript segmentation over single-pass prompting",
           why: "Full-transcript prompting collapsed JSON structure, fabricated timestamps, and missed extraction targets on long-form input.",
           alternatives: "A single prompt over the entire transcript",
           approach:
             "The 'Transcript Checkpoints' algorithm partitions transcripts into discrete segments, each scored 1–10 by the model for relevance, automatically selecting the highest-signal angle.",
           tradeoff:
             "Adds a scoring/selection pass and more pipeline complexity than a single call.",
-          outcome: "In production — structural prompt constraints eliminated JSON collapse and timestamp fabrication.",
+          outcome:
+            "In production — structural prompt constraints eliminated JSON collapse and timestamp fabrication.",
         },
         {
-          title: "Distributed pg-boss job pipeline over inline request handling",
+          title:
+            "Distributed pg-boss job pipeline over inline request handling",
           why: "AI transcript extraction and content generation run long enough that handling them inline would block API responses.",
           approach:
             "A pg-boss distributed job pipeline separates the API, transcript workers, and generation workers into independent processes, with progress reported back over Supabase Realtime/SSE.",
-          tradeoff: "5 independent services to deploy and operate instead of one.",
-          outcome: "97+ Lighthouse score across the multi-service Railway deployment.",
+          tradeoff:
+            "5 independent services to deploy and operate instead of one.",
+          outcome:
+            "97+ Lighthouse score across the multi-service Railway deployment.",
         },
       ],
       fullContent: {
@@ -443,14 +445,16 @@ export const PORTFOLIO_DATA: PortfolioData = {
           alternatives: "A dedicated React component per node type",
           approach:
             "A field registry (registerField/getField) maps field type strings to React components at runtime, so new field types plug in without touching rendering logic.",
-          outcome: "Zero per-node component boilerplate via a single universal NodeController.",
+          outcome:
+            "Zero per-node component boilerplate via a single universal NodeController.",
         },
         {
           title: "Regex-diff parsing for dynamic handle generation",
           why: "Workflow nodes need input handles that update live as a user types template variables.",
           approach:
             "Dynamic ReactFlow handle generation auto-spawns input handles as users type {{variable}} syntax, parsed via regex diff against the prior textarea state.",
-          outcome: "Handles stay in sync with node config with no manual wiring.",
+          outcome:
+            "Handles stay in sync with node config with no manual wiring.",
         },
       ],
       fullContent: {
@@ -481,7 +485,8 @@ export const PORTFOLIO_DATA: PortfolioData = {
       metric: "1.2M+ monthly queries at <150ms avg response",
       tags: ["Next.js", "Supabase", "PostgreSQL"],
       status: "Live",
-      relatedArticleSlug: "i-had-the-index-my-postgres-query-was-still-timing-out",
+      relatedArticleSlug:
+        "i-had-the-index-my-postgres-query-was-still-timing-out",
       // TODO(architecture): conservative diagram built from the stack
       // described below — verify/expand with the real service boundaries.
       architecture: `flowchart LR
@@ -514,13 +519,15 @@ export const PORTFOLIO_DATA: PortfolioData = {
         {
           title: "PostgreSQL row-level security for tenant isolation",
           why: "High-concurrency creator/viewer traffic needed per-creator data isolation enforced consistently.",
-          approach: "PostgreSQL RLS policies enforce row-level access control alongside custom indexing for the analytics query paths.",
+          approach:
+            "PostgreSQL RLS policies enforce row-level access control alongside custom indexing for the analytics query paths.",
           outcome: "1.2M+ monthly queries at <150ms avg response.",
         },
         {
           title: "Sharp-driven image pipeline for storage cost",
           why: "Storage costs scaled directly with creator uploads.",
-          approach: "A Sharp-based image processing pipeline handles uploads before they hit storage.",
+          approach:
+            "A Sharp-based image processing pipeline handles uploads before they hit storage.",
           outcome: "40% reduction in storage costs.",
         },
       ],
