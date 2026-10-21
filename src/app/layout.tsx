@@ -1,9 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Bricolage_Grotesque, Plus_Jakarta_Sans, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { Nav } from "@/components/Nav";
-import { BottomTabBar } from "@/components/BottomTabBar";
-import { LatestBlogBanner } from "@/components/LatestBlogBanner";
+import { Dock } from "@/components/Dock";
+import { MotionProvider } from "@/components/motion/MotionProvider";
 import { PORTFOLIO_DATA } from "@/data/portfolio";
 import { SITE_URL, AUTHOR } from "@/lib/site";
 import { getAllPostMeta } from "@/lib/blog";
@@ -95,6 +94,13 @@ export default function RootLayout({
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+        {/* framer-motion server-renders scroll reveals in their hidden start
+            state; without JS they would never animate in, so force them visible. */}
+        <noscript
+          dangerouslySetInnerHTML={{
+            __html: "<style>[data-reveal]{opacity:1!important;transform:none!important}</style>",
+          }}
+        />
       </head>
       <body className="antialiased min-h-screen">
         <a
@@ -103,14 +109,14 @@ export default function RootLayout({
         >
           Skip to content
         </a>
-        <Nav />
-        <main id="main-content" className="pb-16 md:pb-0">
-          {children}
-        </main>
-        <BottomTabBar />
-        {latestPost && (
-          <LatestBlogBanner slug={latestPost.slug} title={latestPost.title} />
-        )}
+        <MotionProvider>
+          <main id="main-content" className="pb-28">
+            {children}
+          </main>
+          <Dock
+            latestPost={latestPost && { slug: latestPost.slug, title: latestPost.title }}
+          />
+        </MotionProvider>
       </body>
     </html>
   );

@@ -3,16 +3,24 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { motion } from "framer-motion";
 import { ArrowRight, Sparkles, X } from "lucide-react";
 
 const DISMISS_KEY = "latest-blog-banner-dismissed";
 
+/**
+ * "Latest post" pill. Rendered inside the Dock's fixed column (not fixed
+ * itself) so the two move as one: `shiftY` drops it into the dock's place
+ * while the dock is hidden, instead of leaving a gap under it.
+ */
 export function LatestBlogBanner({
   slug,
   title,
+  shiftY = 0,
 }: {
   slug: string;
   title: string;
+  shiftY?: number;
 }) {
   const pathname = usePathname();
   const [dismissed, setDismissed] = useState(true); // hidden until confirmed not-dismissed, avoids a flash
@@ -39,7 +47,11 @@ export function LatestBlogBanner({
   if (pathname !== "/" || dismissed) return null;
 
   return (
-    <div className="fixed bottom-20 md:bottom-6 inset-x-0 z-40 flex justify-center px-4 pointer-events-none">
+    <motion.div
+      className="mb-2 flex w-full justify-center px-4 md:px-0"
+      animate={{ y: shiftY }}
+      transition={{ type: "spring", stiffness: 380, damping: 32 }}
+    >
       <div className="pointer-events-auto flex items-center gap-3 rounded-full border border-border bg-popover/95 backdrop-blur-sm py-2 pl-4 pr-2 shadow-lg max-w-[calc(100vw-2rem)]">
         <Sparkles size={14} className="text-highlight shrink-0" aria-hidden="true" />
         <Link
@@ -67,6 +79,6 @@ export function LatestBlogBanner({
           <X size={13} />
         </button>
       </div>
-    </div>
+    </motion.div>
   );
 }

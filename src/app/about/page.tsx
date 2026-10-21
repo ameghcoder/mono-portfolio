@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 };
 export default function AboutPage() {
   return (
-    <div className="max-container pt-8 pb-16 space-y-16">
+    <div className="max-container pt-10 md:pt-16 pb-16 space-y-16">
       {/* Intro */}
       <header className="space-y-5">
         <span className="label-mono">About</span>

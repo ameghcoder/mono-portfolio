@@ -123,7 +123,7 @@ export default async function PostPage({
   };
 
   return (
-    <div className="wide-container pt-8 pb-16">
+    <div className="wide-container pt-12 md:pt-16 pb-16">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -194,7 +194,7 @@ export default async function PostPage({
 
       {/* Series banner */}
       {series && (
-        <div className="mt-8 max-w-180 border border-border rounded-lg bg-card p-5">
+        <div className="mt-8 max-w-180 border border-border rounded-2xl bg-card p-5">
           <div className="flex items-center gap-2 label-mono mb-3">
             <Layers size={12} />
             {series.name} · Part {series.index} of {series.total}
@@ -230,7 +230,7 @@ export default async function PostPage({
           <Mdx source={post.content} />
         </article>
 
-        <aside className="hidden lg:block sticky top-20">
+        <aside className="hidden lg:block sticky top-8">
           <Toc entries={post.toc} />
         </aside>
       </div>
@@ -241,7 +241,7 @@ export default async function PostPage({
           {series.prev ? (
             <Link
               href={`/blog/${series.prev.slug}`}
-              className="group border border-border rounded-lg p-4 hover:border-highlight transition-colors duration-200"
+              className="group border border-border rounded-2xl p-4 hover:border-highlight transition-colors duration-200"
             >
               <span className="label-mono flex items-center gap-1.5">
                 <ArrowLeft size={11} /> Previous
@@ -256,7 +256,7 @@ export default async function PostPage({
           {series.next && (
             <Link
               href={`/blog/${series.next.slug}`}
-              className="group border border-border rounded-lg p-4 hover:border-highlight transition-colors duration-200 sm:text-right"
+              className="group border border-border rounded-2xl p-4 hover:border-highlight transition-colors duration-200 sm:text-right"
             >
               <span className="label-mono flex items-center gap-1.5 sm:justify-end">
                 Next <ArrowRight size={11} />

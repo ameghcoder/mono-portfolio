@@ -54,7 +54,7 @@ export default function BlogPage() {
   };
 
   return (
-    <div className="wide-container pt-8 pb-16 space-y-12">
+    <div className="wide-container pt-12 md:pt-16 pb-16 space-y-12">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}

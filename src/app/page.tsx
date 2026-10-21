@@ -14,7 +14,7 @@ import { Footer } from "@/components/Footer";
 // person builds, per the portfolio-design skill's content hierarchy.
 export default function Home() {
   return (
-    <div className="max-container pt-4 pb-12 space-y-20">
+    <div className="max-container pt-10 md:pt-16 pb-12 space-y-20">
       <Hero />
       <WhatIBuild />
       <SelectedSystems />
