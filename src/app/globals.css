@@ -15,6 +15,11 @@
 
 :root {
   --radius: 0.75rem;
+  /* Two radii only: containers (cards, panels, media) and controls inside them
+     (buttons, list rows). Tags are pills. */
+  --radius-card: 1rem;
+  --radius-control: 0.75rem;
+  --ease-out: cubic-bezier(0.2, 0, 0, 1);
 
   /* Dark palette — pure black canvas, zinc surfaces/accent (ChatGPT-style) */
   --background: oklch(0 0 0);
@@ -230,8 +235,8 @@
     text-transform: uppercase;
     color: var(--color-muted-foreground);
     border: 1px solid var(--color-border);
-    border-radius: 4px;
-    padding: 3px 8px;
+    border-radius: 999px;
+    padding: 3px 9px;
     white-space: nowrap;
     transition: color 0.2s, border-color 0.2s;
   }
@@ -259,7 +264,7 @@
     align-items: center;
     gap: 8px;
     padding: 10px 18px;
-    border-radius: 8px;
+    border-radius: var(--radius-control);
     background-color: var(--color-card);
     color: var(--color-card-foreground);
     border: 1px solid var(--color-border);
@@ -267,7 +272,12 @@
     font-size: 11px;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    transition: border-color 0.2s, background-color 0.2s;
+    transition: border-color 0.2s, background-color 0.2s, transform 0.15s var(--ease-out);
+  }
+
+  .btn-primary:active,
+  .btn-ghost:active {
+    transform: scale(0.97);
   }
 
   .btn-primary:hover {
@@ -281,19 +291,75 @@
     align-items: center;
     gap: 8px;
     padding: 10px 18px;
-    border-radius: 8px;
+    border-radius: var(--radius-control);
     border: 1px solid var(--color-border);
     color: var(--color-muted-foreground);
     font-family: var(--font-mono), monospace;
     font-size: 11px;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    transition: color 0.2s, border-color 0.2s;
+    transition: color 0.2s, border-color 0.2s, transform 0.15s var(--ease-out);
   }
 
   .btn-ghost:hover {
     color: var(--color-foreground);
     border-color: var(--color-highlight);
+  }
+
+  /* Surface card — the single container style used across the site */
+  .card {
+    position: relative;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-card);
+    background-color: color-mix(in oklch, var(--color-card) 40%, var(--color-background));
+    transition: border-color 0.2s, background-color 0.2s;
+  }
+
+  .card-interactive:hover,
+  .card-interactive:focus-within {
+    border-color: var(--color-input);
+    background-color: var(--color-card);
+  }
+
+  /* Background art — a static dot grid that fades out toward the edges.
+     Decorative only: sits behind content, never carries information. */
+  .dot-grid {
+    background-image: radial-gradient(
+      color-mix(in oklch, var(--color-muted-foreground) 22%, transparent) 1px,
+      transparent 1.2px
+    );
+    background-size: 20px 20px;
+    /* Override per use with [--dot-mask:…] to move where the grid fades. */
+    -webkit-mask-image: var(--dot-mask, radial-gradient(ellipse 70% 65% at 50% 40%, #000 20%, transparent 80%));
+    mask-image: var(--dot-mask, radial-gradient(ellipse 70% 65% at 50% 40%, #000 20%, transparent 80%));
+    pointer-events: none;
+  }
+
+  /* Project status pill — Live / Beta / Closed */
+  .status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    padding: 2px 9px 2px 8px;
+    font-family: var(--font-mono), monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-muted-foreground);
+    white-space: nowrap;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }
 

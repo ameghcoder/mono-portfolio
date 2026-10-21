@@ -18,7 +18,7 @@ export function BlogImage({ src, alt }: { src?: string; alt?: string }) {
         type="button"
         onClick={() => setOpen(true)}
         aria-label={alt ? `Zoom image: ${alt}` : "Zoom image"}
-        className="group relative block w-full cursor-zoom-in overflow-hidden rounded-lg border border-border"
+        className="group relative block w-full cursor-zoom-in overflow-hidden rounded-xl border border-border"
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={src} alt={alt ?? ""} className="block w-full h-auto" />

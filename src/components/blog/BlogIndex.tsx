@@ -84,7 +84,7 @@ export function BlogIndex({
           No posts here yet — check back soon.
         </p>
       ) : (
-        <div className="space-y-px border border-border bg-border rounded-lg overflow-hidden">
+        <div className="space-y-px border border-border bg-border rounded-2xl overflow-hidden">
           {visible.map((post) => (
             <PostCard key={post.slug} post={post} />
           ))}

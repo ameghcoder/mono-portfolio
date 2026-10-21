@@ -16,7 +16,7 @@ export function ArchitectureViewer({ source, title, caption }: ArchitectureViewe
 
   return (
     <>
-      <div className="border border-border bg-card overflow-hidden">
+      <div className="border border-border bg-card rounded-2xl overflow-hidden">
         {/* Title bar */}
         <div className="flex items-center justify-between gap-3 px-4 py-2.5 border-b border-border-dim bg-background/40">
           <div className="flex items-center gap-3 min-w-0">

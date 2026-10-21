@@ -10,7 +10,7 @@ export function PostCard({ post }: { post: PostMeta }) {
       className="group block bg-background hover:bg-card transition-colors duration-200 p-6"
     >
       {post.coverImage && (
-        <div className="relative mb-4 aspect-[1.91/1] w-full overflow-hidden rounded-lg border border-border">
+        <div className="relative mb-4 aspect-[1.91/1] w-full overflow-hidden rounded-xl border border-border">
           <Image
             src={post.coverImage}
             alt={post.coverImageCaption ?? post.title}

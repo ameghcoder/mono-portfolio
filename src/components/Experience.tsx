@@ -8,7 +8,7 @@ export function Experience() {
         <span className="label-mono">Experience</span>
       </div>
 
-      <div className="space-y-px border border-border bg-border">
+      <div className="space-y-px border border-border bg-border rounded-2xl overflow-hidden">
         {PORTFOLIO_DATA.experience.map((exp) => (
           <div
             key={exp.company}

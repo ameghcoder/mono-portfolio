@@ -4,7 +4,7 @@ import { ChevronDown } from "lucide-react";
 /** A single design decision. Native <details> — expands without JS, keyboard-native. */
 export function DecisionRecord({ decision }: { decision: Decision }) {
   return (
-    <details className="group border border-border open:bg-card">
+    <details className="group card open:bg-card">
       <summary className="flex items-center justify-between gap-4 p-5 cursor-pointer list-none [&::-webkit-details-marker]:hidden">
         <span className="text-sm font-medium text-foreground">
           {decision.title}
