@@ -22,7 +22,7 @@ export function Contact() {
   return (
     <section id="contact" className="space-y-8 scroll-mt-20">
       <div className="flex items-center gap-4">
-        <span className="section-index">[06]</span>
+        <span className="section-index">[05]</span>
         <span className="label-mono">Get in Touch</span>
       </div>
 
@@ -35,10 +35,10 @@ export function Contact() {
           {/* Direct contact */}
           <div className="space-y-4">
             <h3 className="text-base font-medium text-foreground">
-              Say hello
+              Let&apos;s talk
             </h3>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              For project inquiries, collaborations, or just to talk systems and architecture.
+              Have a project or a role in mind? Or just want to talk systems? My inbox is open.
             </p>
             <div className="space-y-3">
               <a

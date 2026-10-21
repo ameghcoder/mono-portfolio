@@ -109,6 +109,11 @@ export interface Experience {
   metric: string;
 }
 
+export interface Principle {
+  title: string;
+  body: string;
+}
+
 export interface ExpertiseArea {
   area: string;
   skills: string[];
@@ -138,15 +143,16 @@ export interface PortfolioData {
   heroStats: Metric[];
   /** Short capability phrases for the homepage "What I build" strip. */
   capabilities: string[];
-  /** Homepage narrative — "How I Think" (paragraphs). */
-  howIThink: string[];
-  /** Homepage narrative — "What Makes Me Different" (paragraphs). */
-  whatMakesDifferent: string[];
-  /** Long intro paragraph for the /about page. */
-  intro: string;
-  /** Full "What I Build" list for the /about page. */
+  /** Homepage "How I Work" — one lead line plus a few short principles. */
+  howIWork: {
+    lead: string;
+    principles: Principle[];
+  };
+  /** Short intro paragraphs for the /about page (first one doubles as its meta description). */
+  intro: string[];
+  /** "What I build" list for the /about page. */
   whatIBuild: string[];
-  /** Categorized technical expertise for the /about page. */
+  /** Stack for the /about page, grouped like the resume's skills section. */
   expertise: ExpertiseArea[];
   projects: Project[];
   experience: Experience[];
@@ -192,113 +198,55 @@ export const PORTFOLIO_DATA: PortfolioData = {
     "Creator Platforms",
   ],
 
-  howIThink: [
-    "I don't build features first. I design systems.",
-    "Every project starts by understanding the problem, identifying bottlenecks, and creating an architecture that can survive future growth instead of just today's requirements. I prefer modular systems, clear boundaries, schema-driven design, event-driven workflows, and infrastructure that scales without becoming difficult to maintain.",
-    "Whether it's an AI product, a developer tool, or a SaaS platform, I optimize for simplicity, reliability, and long-term maintainability over short-term hacks.",
-  ],
+  howIWork: {
+    lead: "I don't build features first. I design systems.",
+    principles: [
+      {
+        title: "Built to keep working",
+        body: "Clean code doesn't need babysitting. The PixEarn notification service ran for 4 months without me touching it.",
+      },
+      {
+        title: "Check before I guess",
+        body: "When a query timed out on a 6M-row table, the index wasn't the problem. The query was. I look at real numbers first, then fix.",
+      },
+      {
+        title: "Cheap to run",
+        body: "PixEarn handled 2.5M+ API requests a month on about $38 of infra. I care what my code costs to run.",
+      },
+      {
+        title: "I own the whole thing",
+        body: "UI, API, database, queues, deploy. When one person owns all of it, nothing gets lost in between.",
+      },
+    ],
+  },
 
-  whatMakesDifferent: [
-    "I don't consider myself just a frontend or backend engineer. I enjoy solving difficult engineering problems by designing systems that remain understandable years later.",
-    "I think deeply about architecture before implementation, optimize for maintainability over cleverness, and build software that scales without requiring complete rewrites. My interests sit at the intersection of AI engineering, backend systems, developer experience, and product architecture — where software becomes a platform rather than just an application.",
+  intro: [
+    "I'm Yashraj, a full-stack engineer from Rajasthan, India. I've been shipping production software for 3+ years, and I like owning all of it, from the UI down to the database and the deploy.",
+    "I ran PixEarn solo until it had 2,200+ creators and 2.5M+ API requests a month. Now I'm building Solandra, an AI support tool that answers from your own docs. On the side I ship open source, and STL is at 14k+ npm downloads.",
   ],
-
-  intro:
-    "I'm an AI Engineer, Full-Stack Developer, and System Designer focused on building production-ready AI products from the ground up. I design scalable architectures, distributed backend systems, RAG pipelines, intelligent developer tooling, and creator platforms that solve real-world problems. My work spans the entire stack — from system architecture, databases, APIs, background workers, queues, and infrastructure to intuitive user experiences and deployment. I've built AI content pipelines, creator monetization platforms, open-source developer tools, component registries, and retrieval systems, while shipping products used by thousands of users and serving millions of requests. I enjoy breaking complex problems into simple, maintainable systems that are fast, reliable, and built to evolve over time.",
 
   whatIBuild: [
-    "AI-powered SaaS products",
-    "Retrieval-Augmented Generation (RAG) systems",
-    "Agent workflows & multi-model AI pipelines",
-    "Distributed background job systems",
-    "Queue-based architectures",
-    "API-first backend platforms",
-    "Production PostgreSQL & Supabase infrastructure",
-    "Creator economy platforms",
-    "Open-source developer tools",
-    "Component registries & CLIs",
-    "Schema-driven frameworks",
-    "Modern full-stack web applications",
-    "Internal developer platforms",
-    "High-performance data pipelines",
+    "AI products that answer from real data (RAG, retrieval)",
+    "Backends with queues and background jobs",
+    "PostgreSQL that holds up at millions of rows",
+    "Developer tools: CLIs, npm packages, extensions",
+    "Full-stack SaaS, from UI to deploy",
   ],
 
   expertise: [
+    { area: "Languages", skills: ["TypeScript", "JavaScript", "Python", "SQL"] },
+    { area: "Frontend", skills: ["React", "Next.js", "Tailwind CSS", "shadcn/ui"] },
     {
-      area: "AI Engineering",
-      skills: [
-        "Production RAG architectures",
-        "AI content generation pipelines",
-        "Multi-model routing",
-        "Prompt engineering",
-        "AI workflow orchestration",
-        "Embedding pipelines",
-        "Semantic search",
-        "LLM integrations",
-        "Knowledge indexing",
-        "Retrieval optimization",
-      ],
+      area: "Backend",
+      skills: ["Node.js", "Express", "PostgreSQL", "Redis", "pg-boss", "REST APIs"],
     },
     {
-      area: "Backend Engineering",
-      skills: [
-        "Node.js",
-        "Python",
-        "TypeScript",
-        "Express",
-        "REST APIs",
-        "Background Workers",
-        "Queue Systems (pg-boss)",
-        "PostgreSQL",
-        "Supabase",
-        "Database schema design",
-        "Authentication systems",
-        "Real-time (SSE / WebSockets)",
-        "File processing pipelines",
-        "Edge Functions",
-      ],
+      area: "AI",
+      skills: ["RAG", "LLM integration", "Qdrant", "Vector search", "Prompt engineering"],
     },
     {
-      area: "System Design",
-      skills: [
-        "Distributed architecture",
-        "Event-driven systems",
-        "Modular monoliths",
-        "API architecture",
-        "Scalable infrastructure",
-        "Workflow orchestration",
-        "Schema-driven systems",
-        "Runtime registries",
-        "Domain modeling",
-        "Caching strategies",
-        "Performance optimization",
-      ],
-    },
-    {
-      area: "Frontend",
-      skills: [
-        "Next.js",
-        "React",
-        "TypeScript",
-        "Tailwind CSS",
-        "React Flow",
-        "Zustand",
-        "MDX",
-        "Design systems",
-        "Component architecture",
-      ],
-    },
-    {
-      area: "Infrastructure",
-      skills: [
-        "Railway",
-        "Docker",
-        "Supabase",
-        "PostgreSQL",
-        "CI/CD",
-        "Multi-service deployments",
-        "Environment management",
-      ],
+      area: "Infra",
+      skills: ["Docker", "Linux", "Railway", "Vercel", "Supabase", "AWS S3", "GitHub Actions"],
     },
   ],
 
@@ -1036,7 +984,7 @@ export const PORTFOLIO_DATA: PortfolioData = {
       role: "Full-Stack Engineer · Self-Employed",
       period: "Jan 2025 — Present",
       metric:
-        "Built Solandra (live) and ran PixEarn to 2.5M+ monthly API requests; shipped 4–5 open-source projects, including STL with 14k+ npm downloads",
+        "Built Solandra and ran PixEarn solo. Open source on the side, STL has 14k+ npm downloads",
     },
     {
       company: "Vidharat Marketing",

@@ -17,7 +17,7 @@ export function GET(): Response {
     `> ${profile.role}. ${profile.headline}`,
     "",
     "## About",
-    `- [About ${profile.name}](${SITE_URL}/about): background, how I think, and technical expertise.`,
+    `- [About ${profile.name}](${SITE_URL}/about): background, what I build, and my stack.`,
     "",
     "## Writing",
     ...posts.map(

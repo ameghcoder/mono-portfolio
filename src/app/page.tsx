@@ -3,7 +3,7 @@ import { WhatIBuild } from "@/components/WhatIBuild";
 import { SelectedSystems } from "@/components/SelectedSystems";
 import { RecentWriting } from "@/components/RecentWriting";
 import { OpenSource } from "@/components/OpenSource";
-import { HowIThink, WhatMakesDifferent } from "@/components/Narrative";
+import { HowIWork } from "@/components/Narrative";
 import { Contact } from "@/components/Contact";
 import { Footer } from "@/components/Footer";
 import { Reveal } from "@/components/motion/Reveal";
@@ -29,10 +29,7 @@ export default function Home() {
         <OpenSource />
       </Reveal>
       <Reveal>
-        <HowIThink />
-      </Reveal>
-      <Reveal>
-        <WhatMakesDifferent />
+        <HowIWork />
       </Reveal>
       <Reveal>
         <Contact />
