@@ -16,19 +16,76 @@ export interface Decision {
   outcome?: string;
 }
 
+export type ProjectStatus = "Live" | "Beta" | "Closed";
+
+/** Keys into the icon map in `components/ProjectGlyph.tsx` — kept as strings so
+ * this file stays plain data, importable from server and client components. */
+export type ProjectIcon =
+  | "support"
+  | "video"
+  | "gallery"
+  | "workflow"
+  | "topbar"
+  | "registry"
+  | "table"
+  | "plugin"
+  | "components";
+
+/** A headline number. Real, sourced values only — no metric, no entry. */
+export interface Metric {
+  value: string;
+  label: string;
+}
+
+export interface Screenshot {
+  src: string;
+  alt: string;
+  width: number;
+  height: number;
+  caption?: string;
+}
+
+/** A YouTube demo. The poster is self-hosted so nothing loads from YouTube
+ * until the visitor presses play. */
+export interface Video {
+  youtubeId: string;
+  title: string;
+  duration?: string;
+  poster: Screenshot;
+}
+
+/** A dated point in a project's history, backed by a public post where one exists. */
+export interface Milestone {
+  date: string;
+  title: string;
+  detail: string;
+  source?: string;
+  /** Small inline screenshot backing the claim. */
+  proof?: Screenshot;
+}
+
 export interface Project {
   slug: string;
   title: string;
   type: string;
   description: string;
+  icon: ProjectIcon;
   // Homepage listing fields (present on featured projects)
   index?: string;
   metric?: string;
   tags: string[];
   featured: boolean;
+  /** The one featured project rendered as the large card above the rest. */
+  spotlight?: boolean;
   openSource: boolean;
   /** Only set when directly observable (e.g. a live link exists) — omit rather than guess. */
-  status?: string;
+  status?: ProjectStatus;
+  /** Short qualifier shown next to the status, e.g. "Operated until Aug 2026". */
+  statusNote?: string;
+  metrics?: Metric[];
+  video?: Video;
+  screenshots?: Screenshot[];
+  timeline?: Milestone[];
   /** Mermaid source for the project's real architecture — omit if not documented yet. */
   architecture?: string;
   decisions?: Decision[];
@@ -52,13 +109,6 @@ export interface Experience {
   metric: string;
 }
 
-export interface CurrentlyBuilding {
-  title: string;
-  label: string;
-  description: string;
-  tags: string[];
-}
-
 export interface ExpertiseArea {
   area: string;
   skills: string[];
@@ -75,6 +125,7 @@ export interface PortfolioData {
     email: string;
     avatar: string;
     calendarUrl: string;
+    resumeUrl: string;
     repoUrl: string;
   };
   /** Short capability phrases for the homepage "What I build" strip. */
@@ -89,7 +140,6 @@ export interface PortfolioData {
   whatIBuild: string[];
   /** Categorized technical expertise for the /about page. */
   expertise: ExpertiseArea[];
-  currentlyBuilding: CurrentlyBuilding[];
   projects: Project[];
   experience: Experience[];
   socials: {
@@ -102,15 +152,16 @@ export interface PortfolioData {
 export const PORTFOLIO_DATA: PortfolioData = {
   profile: {
     name: "Yashraj Yadav",
-    role: "AI Engineer & Full-Stack Developer",
+    role: "Full-Stack Engineer · AI Systems · Backend & Product Engineering",
     headline:
-      "AI Engineer and Full-Stack Developer building production-ready AI products end to end. I turn complexity into simple, reliable systems.",
-    bio: "4+ years building production systems. 45,000+ monthly users. I own the full stack.",
+      "Full-Stack Engineer building and shipping production software end to end, from UI and system architecture to deployment and maintenance. I work across TypeScript, Next.js, Node.js, PostgreSQL, and AI systems: RAG, retrieval, and automation.",
+    bio: "3+ years shipping production software. Solandra is live. PixEarn reached 2.5M+ API requests/month. STL has 14k+ npm downloads.",
     location: "Rajasthan, India / Remote",
     availability: "// AVAILABLE FOR PROJECTS & COLLABORATIONS",
     email: "mintuser65@gmail.com",
     avatar: "/yrjdev.jpg",
     calendarUrl: "https://cal.com/yrjdev/lets-discuss",
+    resumeUrl: "/resume/yashraj_fs_engineer.pdf",
     repoUrl: "https://github.com/ameghcoder/mono-portfolio",
   },
 
@@ -233,29 +284,112 @@ export const PORTFOLIO_DATA: PortfolioData = {
     },
   ],
 
-  currentlyBuilding: [
-    {
-      title: "SupportGPT",
-      label: "IN BUILD",
-      description:
-        "An AI customer support platform that automatically crawls websites, builds a knowledge base, and answers customer questions through an advanced RAG pipeline — automated ingestion, semantic indexing, intelligent retrieval, and multi-model routing that eliminates manual documentation setup.",
-      tags: ["RAG", "Multi-model routing", "Semantic indexing"],
-    },
-  ],
-
   projects: [
+    {
+      slug: "solandra",
+      title: "Solandra",
+      type: "AI Customer Support & Knowledge Intelligence",
+      description:
+        "An AI customer support platform that answers website visitors from a business's own site and docs, shows the source pages behind each answer, and turns the questions it couldn't answer into a review list for the team.",
+      icon: "support",
+      featured: true,
+      spotlight: true,
+      openSource: false,
+      index: "01",
+      metric: "Hybrid retrieval: Qdrant vector search + PostgreSQL full-text",
+      tags: ["Qdrant", "PostgreSQL", "Hybrid retrieval", "Next.js"],
+      status: "Live",
+      // TODO(architecture): conservative diagram built from the components
+      // described below — verify/expand with the real service boundaries.
+      architecture: `flowchart LR
+    Site["Business Website<br/>& Docs"]
+    Ingest["Crawler +<br/>Content Ingestion"]
+    PG["PostgreSQL<br/>Tenants · Content<br/>Full-text Search"]
+    Qdrant["Qdrant<br/>Vector Search"]
+    Retrieval["Hybrid Retrieval"]
+    LLM["LLM Answer Generation<br/>source-backed"]
+    Widget["Embeddable<br/>Support Widget"]
+    Gaps["Knowledge-Gap<br/>Detection"]
+    Team["Business Team<br/>review list · escalation"]
+
+    Site --> Ingest
+    Ingest --> PG
+    Ingest -->|embeddings| Qdrant
+    Widget -->|visitor question| Retrieval
+    Retrieval --> Qdrant
+    Retrieval --> PG
+    Retrieval --> LLM
+    LLM -->|answer + sources| Widget
+    LLM -->|unanswered| Gaps
+    Gaps --> Team
+    Widget -->|human escalation| Team
+
+    classDef api fill:#1e293b,stroke:#94a3b8,color:#ffffff
+    classDef ai fill:#7c3aed,stroke:#c4b5fd,color:#ffffff
+    classDef data fill:#92400e,stroke:#fcd34d,color:#ffffff
+    classDef client fill:#111827,stroke:#9ca3af,color:#ffffff
+
+    class Site,Widget,Team client
+    class Ingest,Retrieval,Gaps api
+    class LLM ai
+    class PG,Qdrant data
+`,
+      decisions: [
+        {
+          title: "Hybrid retrieval: Qdrant vector search + PostgreSQL full-text",
+          why: "Answers have to come from the business's own content and point back to it, so retrieval quality decides answer quality.",
+          approach:
+            "Combines Qdrant vector search with PostgreSQL full-text search, then generates the answer with an LLM over the retrieved content and returns the source pages alongside it.",
+        },
+        {
+          title: "Unanswered questions become a review list",
+          why: "When a support bot can't answer a question, the question usually just disappears, and the gap in the documentation never gets fixed.",
+          approach:
+            "Knowledge-gap detection flags the questions Solandra couldn't answer and surfaces them to the business as a list to improve its documentation.",
+        },
+      ],
+      fullContent: {
+        overview:
+          "Founded and independently built Solandra, an AI-powered customer support platform that answers visitor questions from a business's documentation and website content, with source-backed responses. I took it from architecture to a working private beta, and it is now live with paid plans.",
+        challenge:
+          "Setting up an AI support bot usually means writing and maintaining a knowledge base by hand, and the questions the bot can't answer vanish without anyone on the team seeing them.",
+        solution:
+          "Solandra crawls the business's website, ingests the content into a multi-tenant store, and answers through hybrid retrieval (Qdrant vectors + PostgreSQL full-text) with LLM answer generation that cites its sources. Questions it couldn't answer feed a knowledge-gap list so the team knows what to document next.",
+        tech: [
+          "Next.js",
+          "TypeScript",
+          "Node.js",
+          "PostgreSQL",
+          "Qdrant",
+          "OpenAI",
+          "REST APIs",
+          "Supabase",
+        ],
+        impact: [
+          "Hybrid retrieval combining Qdrant vector search, PostgreSQL full-text search, and LLM answer generation",
+          "Embeddable support chatbot with conversational context, configurable widget settings, and human escalation",
+          "Automated knowledge-gap detection that turns unanswered questions into a documentation review list",
+          "Website crawling, content ingestion, and multi-tenant data management",
+          "Secure API integrations for the embeddable widget",
+        ],
+        links: {
+          live: "https://solandra.io",
+        },
+      },
+    },
     {
       slug: "creatorjot",
       title: "CreatorJot",
-      type: "AI Content Pipeline for YouTube Content Repurpose",
+      type: "AI Content Automation Platform",
       description:
-        "An AI-powered pipeline that repurposes YouTube content into platform-ready assets using a custom transcript segmentation algorithm and distributed job orchestration.",
+        "An AI content automation platform that turned YouTube transcripts into structured, platform-ready content through a multi-LLM pipeline (GPT, Claude, Gemini) running on background job queues.",
+      icon: "video",
       featured: true,
       openSource: false,
-      index: "01",
-      metric: "97+ Lighthouse score across multi-service Railway deployment",
-      tags: ["Next.js 15", "pg-boss", "Gemini AI"],
-      status: "Live",
+      index: "02",
+      metric: "~85% fewer tokens per LLM call via schema-based context compression",
+      tags: ["pg-boss", "Multi-LLM", "Next.js 15"],
+      status: "Closed",
       // TODO(architecture): source is the real production diagram, kept in
       // sync manually — update here if the system changes.
       architecture: `flowchart TB
@@ -367,10 +501,17 @@ export const PORTFOLIO_DATA: PortfolioData = {
           outcome:
             "97+ Lighthouse score across the multi-service Railway deployment.",
         },
+        {
+          title: "Schema-based context compression for LLM calls",
+          why: "Running GPT, Claude, and Gemini over long transcripts made token usage the main cost to control.",
+          approach:
+            "Each stage writes structured, schema-versioned intermediate data that later calls reuse as compressed context, with per-call token and cost tracking.",
+          outcome: "Roughly 85% lower token usage per call.",
+        },
       ],
       fullContent: {
         overview:
-          "Designed and built an end-to-end AI content repurposing system that extracts high-signal angles from YouTube transcripts and generates hooks, summaries, and key moments tailored to each platform.",
+          "Designed and built an AI content automation platform that turned YouTube video transcripts into structured content for multiple publishing channels: hooks, summaries, and key moments tailored to each platform. A multi-LLM pipeline orchestrated GPT, Claude, and Gemini through background job queues across a 5-node Railway deployment. CreatorJot is now closed.",
         challenge:
           "LLMs collapsed JSON structure, fabricated timestamps, and missed extraction targets when processing long-form transcripts — requiring a principled approach to prompt engineering and output validation.",
         solution:
@@ -378,26 +519,229 @@ export const PORTFOLIO_DATA: PortfolioData = {
         tech: [
           "Next.js 15",
           "TypeScript",
+          "Node.js",
           "Express 5",
           "Supabase",
           "PostgreSQL",
           "pg-boss",
-          "Gemini AI",
-          "Claude AI",
+          "GPT",
+          "Claude",
+          "Gemini",
           "Railway",
           "Supabase Realtime",
           "SSE",
         ],
         impact: [
-          "97+ Lighthouse score across multi-service Railway deployment",
-          "5 independent nodes: API, workers, frontend",
-          "Real-time progress tracking via Supabase Realtime/SSE",
+          "~85% lower per-call token usage via schema-based context compression",
+          "Multi-LLM pipeline (GPT, Claude, Gemini) across a 5-node Railway deployment",
+          "Job processing, schema versioning, and per-call token and cost tracking",
           "Structural prompt constraints eliminating JSON collapse and timestamp fabrication",
-          "Concurrent AI transcript extraction and content generation via distributed job pipeline",
+          "Real-time progress tracking via Supabase Realtime/SSE",
+          "97+ Lighthouse score across the multi-service deployment",
         ],
-        links: {
-          live: "https://creatorjot.com",
+        links: {},
+      },
+    },
+    {
+      slug: "pixearn",
+      title: "PixEarn",
+      type: "Creator Marketplace",
+      description:
+        "A creator marketplace for digital art and wallpapers that I designed, built, and ran solo, growing it to 2,200+ creators, 6,000+ artworks, and 15k+ monthly active users before it closed in Aug 2026.",
+      icon: "gallery",
+      featured: true,
+      openSource: false,
+      index: "03",
+      metric: "2.5M+ API requests/month at sub-150ms on ~$38/month of infra",
+      tags: ["Next.js", "PostgreSQL", "Supabase"],
+      status: "Closed",
+      statusNote: "Operated until Aug 2026",
+      metrics: [
+        { value: "2,200+", label: "Registered creators" },
+        { value: "6,000+", label: "Artworks" },
+        { value: "15k+", label: "Monthly active users" },
+        { value: "6M", label: "Image impressions" },
+        { value: "2.5M+", label: "API requests / month" },
+        { value: "~$38", label: "Infra cost / month" },
+      ],
+      screenshots: [
+        {
+          src: "/projects/pixearn/feed.jpg",
+          alt: "PixEarn's image feed at pixearn.com with tag filters and a wallpaper grid",
+          width: 1920,
+          height: 1440,
+          caption: "The public feed",
         },
+        {
+          src: "/projects/pixearn/creator-profile.png",
+          alt: "A PixEarn creator profile with follower counts, a Support button, and Images, Store, and About tabs",
+          width: 1920,
+          height: 1080,
+          caption: "Creator profile",
+        },
+        {
+          src: "/projects/pixearn/support-me-dashboard.png",
+          alt: "PixEarn creator dashboard showing the Support Me editor with PayPal, UPI, Buy Me a Coffee, Ko-fi, Patreon, Wise, Paytm, and custom link options",
+          width: 1920,
+          height: 1080,
+          caption: "Dashboard: Support Me links",
+        },
+        {
+          src: "/projects/pixearn/analytics-jun-2026.png",
+          alt: "Google Analytics for the 28 days to Jun 2026: 7.9K active users, 39K views, 2m 05s average session, 84.5% DAU/MAU",
+          width: 1696,
+          height: 558,
+          caption: "Analytics, 28 days to Jun 2026",
+        },
+      ],
+      timeline: [
+        {
+          date: "Apr 2026",
+          title: "One creator's Story drove 5,400 views in a day",
+          detail:
+            "A single Instagram Story from a creator with 5.6K followers sent daily views to 5,400, up 773.8% on the comparison day. By then 100+ creators had pixearn.com in their bio, and the library held 3K+ wallpapers in up to 8K resolution.",
+          source: "https://x.com/yrjdev/status/2044653478535188910",
+        },
+        {
+          date: "Apr 2026",
+          title: "Notification service: 4 months untouched, zero failures",
+          detail:
+            "The notification system, built with Express, Supabase, and Resend, ran for four months without a code change, an error, or a failed send.",
+          source: "https://x.com/yrjdev/status/2046918508316143789",
+        },
+        {
+          date: "May 2026",
+          title: "Shipped the Support Me button",
+          detail:
+            "Creators could add PayPal, UPI, Paytm, or any custom link to their profile and get paid directly by their audience, with no platform cut and no hidden fees.",
+          source: "https://x.com/pixearn/status/2054418458549600684",
+        },
+        {
+          date: "May 2026",
+          title: "4.1M image impressions, 12K+ MAU, 52K+ downloads",
+          detail:
+            "Team of one, working from a bedroom, $0 in funding. The impressions table had just passed 4.1M rows.",
+          source: "https://x.com/yrjdev/status/2054850053898981559",
+          proof: {
+            src: "/projects/pixearn/impressions-table-4.1m.png",
+            alt: "Database table view showing 4.1M records (estimated)",
+            width: 420,
+            height: 158,
+          },
+        },
+        {
+          date: "Jun 2026",
+          title: "AdSense approved on the 25th application",
+          detail:
+            "After 24 rejections over a year, the 25th application was approved and view-based earnings came back for creators.",
+          source: "https://x.com/yrjdev/status/2069275373972619471",
+        },
+        {
+          date: "Aug 2026",
+          title: "Statement timeouts on a 5.9M-row table",
+          detail:
+            "log_impression started throwing Postgres 57014 timeouts even though the table had the right index. Fixed the predicate, built indexes with CREATE INDEX CONCURRENTLY, and capped a retry loop that kept requeuing failed batches.",
+          source: "https://x.com/yrjdev/status/2085918068753236302",
+        },
+        {
+          date: "Aug 2026",
+          title: "PixEarn closed",
+          detail:
+            "Shut down after running it solo, with 2,200+ creators, 6,000+ artworks, and 6M image impressions.",
+        },
+      ],
+      relatedArticleSlug:
+        "i-had-the-index-my-postgres-query-was-still-timing-out",
+      // TODO(architecture): conservative diagram built from the stack
+      // described below — verify/expand with the real service boundaries.
+      architecture: `flowchart LR
+    Client["Client<br/>Creator / Viewer"]
+    Edge["Next.js<br/>Edge-Optimized SSR"]
+    API["API Routes<br/>Node.js"]
+    PG["PostgreSQL<br/>Row-Level Security + Custom Indexes"]
+    Sharp["Sharp Pipeline<br/>Image Processing"]
+    Storage["Supabase Storage"]
+
+    Client -->|request| Edge
+    Edge --> API
+    API -->|tenant-scoped queries| PG
+    API -->|upload| Sharp
+    Sharp --> Storage
+    PG -->|analytics reads| API
+    API -->|response| Client
+
+    classDef api fill:#1e293b,stroke:#94a3b8,color:#ffffff
+    classDef data fill:#92400e,stroke:#fcd34d,color:#ffffff
+    classDef client fill:#111827,stroke:#9ca3af,color:#ffffff
+
+    class Client client
+    class Edge,API api
+    class PG,Sharp,Storage data
+`,
+      // TODO(experiments): no baseline->change->result data captured for this
+      // project yet — add here if/when a real experiment is run.
+      decisions: [
+        {
+          title: "PostgreSQL row-level security for tenant isolation",
+          why: "High-concurrency creator/viewer traffic needed per-creator data isolation enforced consistently.",
+          approach:
+            "PostgreSQL RLS policies enforce row-level access control alongside custom indexing for the analytics query paths.",
+          outcome: "1.2M+ monthly queries at <150ms avg response.",
+        },
+        {
+          title: "Sharp-driven image pipeline for storage cost",
+          why: "Storage costs scaled directly with creator uploads.",
+          approach:
+            "A Sharp-based image processing pipeline handles uploads before they hit storage.",
+          outcome: "40% reduction in storage costs.",
+        },
+        {
+          title: "Fraud detection for view-based earnings",
+          why: "Creators earned from views, so view counts had to hold up against inflated traffic.",
+          approach:
+            "Fraud detection scored traffic using visitor fingerprints and IP-based signals.",
+        },
+        {
+          title: "Sargable predicate + CREATE INDEX CONCURRENTLY on a hot table",
+          why: "log_impression threw 57014 statement timeouts at 1.4M calls a day on a ~5.9M-row table that already had a matching index.",
+          approach:
+            "Rewrote the predicate so created_at stayed bare and usable as an index bound, built indexes with CREATE INDEX CONCURRENTLY by hand (the migration tool wraps everything in a transaction) and mirrored them with an IF NOT EXISTS migration, then capped the client retry loop at 40 ids per flush and 3 retries.",
+          tradeoff:
+            "CONCURRENTLY builds slower and can leave an invalid index if it fails partway, and the hand-run step sits outside the normal migration flow.",
+          outcome: "Timeouts resolved. Full write-up in the related article.",
+        },
+      ],
+      fullContent: {
+        overview:
+          "Independently designed, built, and operated PixEarn, a creator marketplace for digital art and wallpapers. It grew to 2,200+ registered creators, 6,000+ artworks, 15k+ monthly active users, and 6M image impressions, and ran until August 2026.",
+        challenge:
+          "Every image view was logged as an impression for creator analytics and earnings, so a solo-run platform had to absorb high-concurrency write traffic, keep each creator's data isolated, and stay cheap enough to run on a tiny budget.",
+        solution:
+          "Edge-optimized SSR, PostgreSQL row-level security with indexes tuned to the real query paths, and a Sharp image pipeline that cut storage costs by 40%. Creator payment workflows, a no-cut Support Me button, and fraud detection using visitor fingerprints and IP signals made earnings trustworthy. The whole platform ran on about $38/month of infrastructure.",
+        tech: [
+          "Next.js",
+          "TypeScript",
+          "Node.js",
+          "Express",
+          "Supabase",
+          "PostgreSQL",
+          "AWS S3",
+          "Razorpay",
+          "Resend",
+          "Sharp",
+          "Zustand",
+          "Tailwind CSS",
+          "Railway",
+        ],
+        impact: [
+          "2.5M+ API requests and 1.2M+ database queries per month",
+          "97%+ request success rate at sub-150ms latency",
+          "~$38/month total infrastructure cost",
+          "Creator payment workflows and a no-cut Support Me button",
+          "Fraud detection using visitor fingerprints and IP-based signals",
+          "98+ Lighthouse performance score",
+        ],
+        links: {},
       },
     },
     {
@@ -406,9 +750,10 @@ export const PORTFOLIO_DATA: PortfolioData = {
       type: "Node Abstraction Layer for Composable AI Workflows",
       description:
         "A config-driven orchestration system for building composable AI workflows, where all node types are defined as JSON and rendered by a single universal controller.",
+      icon: "workflow",
       featured: true,
       openSource: false,
-      index: "02",
+      index: "04",
       metric:
         "Zero per-node component boilerplate via universal NodeController",
       tags: ["ReactFlow", "Zustand", "Runtime registry"],
@@ -474,90 +819,60 @@ export const PORTFOLIO_DATA: PortfolioData = {
       },
     },
     {
-      slug: "pixearn",
-      title: "PixEarn",
-      type: "Creator Monetization Platform",
+      slug: "agent-bar",
+      title: "AgentBar",
+      type: "GNOME Extension for Claude Code",
       description:
-        "A production-grade platform serving 45,000+ Monthly Views & 19,000+ Monthly Active Users with real-time analytics, revenue distribution and more.",
-      featured: true,
-      openSource: false,
-      index: "03",
-      metric: "1.2M+ monthly queries at <150ms avg response",
-      tags: ["Next.js", "Supabase", "PostgreSQL"],
-      status: "Live",
-      relatedArticleSlug:
-        "i-had-the-index-my-postgres-query-was-still-timing-out",
-      // TODO(architecture): conservative diagram built from the stack
-      // described below — verify/expand with the real service boundaries.
-      architecture: `flowchart LR
-    Client["Client<br/>Creator / Viewer"]
-    Edge["Next.js<br/>Edge-Optimized SSR"]
-    API["API Routes<br/>Node.js"]
-    PG["PostgreSQL<br/>Row-Level Security + Custom Indexes"]
-    Sharp["Sharp Pipeline<br/>Image Processing"]
-    Storage["Supabase Storage"]
-
-    Client -->|request| Edge
-    Edge --> API
-    API -->|tenant-scoped queries| PG
-    API -->|upload| Sharp
-    Sharp --> Storage
-    PG -->|analytics reads| API
-    API -->|response| Client
-
-    classDef api fill:#1e293b,stroke:#94a3b8,color:#ffffff
-    classDef data fill:#92400e,stroke:#fcd34d,color:#ffffff
-    classDef client fill:#111827,stroke:#9ca3af,color:#ffffff
-
-    class Client client
-    class Edge,API api
-    class PG,Sharp,Storage data
-`,
-      // TODO(experiments): no baseline->change->result data captured for this
-      // project yet — add here if/when a real experiment is run.
-      decisions: [
-        {
-          title: "PostgreSQL row-level security for tenant isolation",
-          why: "High-concurrency creator/viewer traffic needed per-creator data isolation enforced consistently.",
-          approach:
-            "PostgreSQL RLS policies enforce row-level access control alongside custom indexing for the analytics query paths.",
-          outcome: "1.2M+ monthly queries at <150ms avg response.",
+        "Shows what your Claude Code sessions are doing in the GNOME top bar, so you can work in another window and still know when Claude needs you.",
+      icon: "topbar",
+      featured: false,
+      openSource: true,
+      tags: ["GNOME Shell", "GJS", "Claude Code Hooks"],
+      status: "Beta",
+      statusNote: "v0.2.0",
+      video: {
+        youtubeId: "XnhgjNQLooQ",
+        title: "AgentBar: Know What Every Claude Code Session Is Doing, From Your GNOME Top Bar",
+        duration: "60s",
+        poster: {
+          src: "/projects/agent-bar/launch-video-poster.jpg",
+          alt: "AgentBar launch video: a 'Permission needed' banner and top-bar label for the agent-bar session",
+          width: 1280,
+          height: 720,
         },
+      },
+      screenshots: [
         {
-          title: "Sharp-driven image pipeline for storage cost",
-          why: "Storage costs scaled directly with creator uploads.",
-          approach:
-            "A Sharp-based image processing pipeline handles uploads before they hit storage.",
-          outcome: "40% reduction in storage costs.",
+          src: "/projects/agent-bar/topbar-menu.png",
+          alt: "AgentBar menu open from the GNOME top bar, listing the agent-bar and solandra sessions as Ended, a 'No recent events' health line, and a Copy 'agentbar doctor' action",
+          width: 493,
+          height: 280,
+          caption: "Top-bar menu: sessions, health line, doctor",
         },
       ],
       fullContent: {
         overview:
-          "Designed and deployed a creator platform handling 1.2M+ queries monthly with <100–150ms average response time.",
+          "An MIT-licensed Linux desktop tool that monitors multiple Claude Code sessions from the GNOME top bar. The bar shows the session that matters most, its state, and how long ago it last did something. The menu lists every session, and clicking one brings its terminal or editor window to the front.",
         challenge:
-          "Built and scaled real-time impression and engagement analytics, handling high-concurrency database traffic while enforcing row-level security with PostgreSQL RLS.",
+          "With several Claude Code sessions running in different terminals, the only way to know whether one is waiting for input, needs permission, or failed is to keep checking each window.",
         solution:
-          "Implemented edge-optimized SSR, custom database indexing, and a Sharp-driven image processing pipeline reducing storage costs by 40%.",
+          "An event-driven design: Claude Code hooks write session events to local JSON state, and a GNOME Shell extension renders it within a second of each event. Notifications fire only when Claude needs permission, is waiting, finishes a turn, or fails. States stay honest: a session with no news for 10 minutes says \"No updates\" instead of guessing, and a closed terminal reads \"Ended\".",
         tech: [
-          "Next.js",
           "TypeScript",
-          "Supabase",
-          "PostgreSQL",
-          "Zustand",
-          "Tailwind CSS",
-          "Sharp",
           "Node.js",
-          "Railway",
+          "GNOME Shell",
+          "GJS",
+          "Linux",
+          "Claude Code Hooks",
         ],
         impact: [
-          "45,000+ Monthly Views",
-          "19,000+ Monthly Active Users",
-          "1.2M+ Monthly Queries",
-          "98+ Lighthouse Performance Score",
-          "1,200+ Creators Joined",
+          "Local-first: no account, no server, no telemetry",
+          "Packaged for Ubuntu as a .deb installer",
+          "Multi-session tracking, desktop notifications, and terminal window navigation",
+          "install-hooks with a dry run and settings backup, plus an agentbar doctor diagnostic command",
         ],
         links: {
-          live: "https://pixearn.com",
+          github: "https://github.com/ameghcoder/agent-bar",
         },
       },
     },
@@ -567,6 +882,7 @@ export const PORTFOLIO_DATA: PortfolioData = {
       type: "Component Registry CLI",
       description:
         "Automated registry generation engine for modern UI libraries, bridging the gap between source and discovery.",
+      icon: "registry",
       featured: false,
       openSource: true,
       tags: ["Node.js", "TypeScript", "ts-morph"],
@@ -579,7 +895,7 @@ export const PORTFOLIO_DATA: PortfolioData = {
           "Built a robust parser using ts-morph for deep AST manipulation and custom scaffolding logic for maintainers.",
         tech: ["Node.js", "TypeScript", "Commander.js", "ts-morph"],
         impact: [
-          "100+ Downloads",
+          "200+ npm downloads",
           "Used by UI libraries",
           "95% reduction in manual effort",
         ],
@@ -596,6 +912,7 @@ export const PORTFOLIO_DATA: PortfolioData = {
       type: "Structured Table Language",
       description:
         "Framework-agnostic DSL for building clean, interactive tables with schema-driven architecture.",
+      icon: "table",
       featured: false,
       openSource: true,
       tags: ["TypeScript", "Node.js", "DSL"],
@@ -608,6 +925,7 @@ export const PORTFOLIO_DATA: PortfolioData = {
           "Developed a core parser and CLI tool that reduces table boilerplate code by 70% for developers.",
         tech: ["TypeScript", "Node.js", "Commander.js", "npm"],
         impact: [
+          "14k+ npm downloads",
           "70% reduction in boilerplate",
           "Version control-friendly table definitions",
           "Sanity CMS plugin integration",
@@ -625,6 +943,7 @@ export const PORTFOLIO_DATA: PortfolioData = {
       type: "Sanity CMS Plugin",
       description:
         "A Sanity Studio plugin that enables content creators to author complex, flexible tables using Structured Table Language (STL) with live preview support.",
+      icon: "plugin",
       featured: false,
       openSource: true,
       tags: ["TypeScript", "Sanity Studio", "React"],
@@ -643,6 +962,7 @@ export const PORTFOLIO_DATA: PortfolioData = {
           "structured-table-cli",
         ],
         impact: [
+          "13k+ npm downloads",
           "Enabled complex table layouts with row spans, column spans, header, footer, rich cells and more",
           "Improved editor experience with real-time table previews inside Sanity Studio",
           "Version-control-friendly table definitions stored as readable STL strings",
@@ -661,6 +981,7 @@ export const PORTFOLIO_DATA: PortfolioData = {
       type: "Smart Component Library",
       description:
         "Intelligent UI kit built on top of shadcn/ui with state-aware components and automated adaptation.",
+      icon: "components",
       featured: false,
       openSource: true,
       tags: ["Next.js", "Turborepo", "shadcn/ui"],
@@ -692,6 +1013,13 @@ export const PORTFOLIO_DATA: PortfolioData = {
   ],
 
   experience: [
+    {
+      company: "Independent",
+      role: "Full-Stack Engineer · Self-Employed",
+      period: "Jan 2025 — Present",
+      metric:
+        "Built Solandra (live) and ran PixEarn to 2.5M+ monthly API requests; shipped 4–5 open-source projects, including STL with 14k+ npm downloads",
+    },
     {
       company: "Vidharat Marketing",
       role: "Senior Full-Stack Developer",

@@ -26,12 +26,12 @@ export function RecentWriting() {
         </Link>
       </div>
 
-      <div className="space-y-px border border-border bg-border">
+      <div className="space-y-3">
         {posts.map((post) => (
           <Link
             key={post.slug}
             href={`/blog/${post.slug}`}
-            className="group block bg-background hover:bg-card p-6 transition-colors duration-200"
+            className="group card card-interactive block p-6 hover:-translate-y-0.5 transition-[transform,border-color,background-color] duration-200"
           >
             <div className="flex items-center gap-3 flex-wrap mb-2">
               <span className="font-mono text-[10px] uppercase tracking-[0.1em] text-highlight">

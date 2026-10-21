@@ -2,7 +2,7 @@ import { PORTFOLIO_DATA } from "@/data/portfolio";
 
 export function WhatIBuild() {
   return (
-    <section className="border-y border-border py-8 md:py-9">
+    <section className="card p-6 md:p-7">
       <span className="label-mono block mb-6">What I Build</span>
       <ul className="grid grid-cols-2 md:grid-cols-3 gap-x-6 gap-y-4">
         {PORTFOLIO_DATA.capabilities.map((item) => (

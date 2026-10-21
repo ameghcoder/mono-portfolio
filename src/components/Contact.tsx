@@ -22,12 +22,16 @@ export function Contact() {
   return (
     <section id="contact" className="space-y-8 scroll-mt-20">
       <div className="flex items-center gap-4">
-        <span className="section-index">[07]</span>
+        <span className="section-index">[06]</span>
         <span className="label-mono">Get in Touch</span>
       </div>
 
-      <div className="space-y-px border border-border bg-border">
-        <div className="bg-background p-8">
+      <div className="card isolate overflow-hidden">
+        <div
+          aria-hidden="true"
+          className="dot-grid absolute -z-10 inset-y-0 right-0 w-1/2 [--dot-mask:radial-gradient(ellipse_80%_90%_at_100%_50%,#000_10%,transparent_70%)]"
+        />
+        <div className="p-6 md:p-8">
           {/* Direct contact */}
           <div className="space-y-4">
             <h3 className="text-base font-medium text-foreground">
