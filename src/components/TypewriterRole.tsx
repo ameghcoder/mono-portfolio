@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-const ROLES = ["AI Engineer", "Full-Stack Dev", "System Designer"];
+const ROLES = ["Full-Stack Engineer", "AI Systems", "Backend & Product"];
 
 const TYPING_MS = 75;
 const DELETING_MS = 35;

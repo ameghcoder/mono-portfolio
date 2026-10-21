@@ -35,9 +35,10 @@ export const metadata: Metadata = {
   authors: [{ name: AUTHOR.name, url: AUTHOR.url }],
   creator: AUTHOR.name,
   keywords: [
-    "AI Engineer",
-    "Full-Stack Developer",
-    "System Designer",
+    "Full-Stack Engineer",
+    "AI Systems",
+    "Backend Engineering",
+    "Product Engineering",
     "RAG",
     "Retrieval-Augmented Generation",
     "Next.js",

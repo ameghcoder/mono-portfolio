@@ -118,6 +118,10 @@ export interface PortfolioData {
   profile: {
     name: string;
     role: string;
+    /** One-line statement shown large in the hero. */
+    tagline: string;
+    /** Short stack line under the tagline. */
+    stackLine: string;
     headline: string;
     bio: string;
     location: string;
@@ -127,7 +131,11 @@ export interface PortfolioData {
     calendarUrl: string;
     resumeUrl: string;
     repoUrl: string;
+    /** GitHub username for the hero contribution graph. */
+    githubUser: string;
   };
+  /** Hero stats tile — real, sourced numbers only. */
+  heroStats: Metric[];
   /** Short capability phrases for the homepage "What I build" strip. */
   capabilities: string[];
   /** Homepage narrative — "How I Think" (paragraphs). */
@@ -153,6 +161,9 @@ export const PORTFOLIO_DATA: PortfolioData = {
   profile: {
     name: "Yashraj Yadav",
     role: "Full-Stack Engineer · AI Systems · Backend & Product Engineering",
+    tagline:
+      "I build production software end to end, from UI and system architecture to deployment.",
+    stackLine: "TypeScript · Next.js · Node.js · PostgreSQL · RAG & AI systems",
     headline:
       "Full-Stack Engineer building and shipping production software end to end, from UI and system architecture to deployment and maintenance. I work across TypeScript, Next.js, Node.js, PostgreSQL, and AI systems: RAG, retrieval, and automation.",
     bio: "3+ years shipping production software. Solandra is live. PixEarn reached 2.5M+ API requests/month. STL has 14k+ npm downloads.",
@@ -163,7 +174,14 @@ export const PORTFOLIO_DATA: PortfolioData = {
     calendarUrl: "https://cal.com/yrjdev/lets-discuss",
     resumeUrl: "/resume/yashraj_fs_engineer.pdf",
     repoUrl: "https://github.com/ameghcoder/mono-portfolio",
+    githubUser: "ameghcoder",
   },
+
+  heroStats: [
+    { value: "3+", label: "Years shipping" },
+    { value: "2.5M+", label: "API req/mo · PixEarn" },
+    { value: "14k+", label: "npm downloads · STL" },
+  ],
 
   capabilities: [
     "AI-Powered SaaS",
