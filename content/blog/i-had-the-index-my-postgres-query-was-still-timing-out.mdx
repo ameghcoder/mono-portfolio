@@ -1,6 +1,6 @@
 ---
 title: "I Had the Index. My Query Was Still Timing Out."
-summary: "A Postgres RPC with the exact right index still threw 57014 statement timeouts at 1.4M calls a day. The index was fine — the predicate wrapped the column in arithmetic and made it unusable."
+summary: "A Postgres RPC with the right index still threw 57014 statement timeouts at 5.5M calls a month. The index was fine, but the way I wrote the query wasn't."
 category: "Database"
 coverImage: "/blogs/i-had-the-index-my-postgresql-query-was-still-slow-why.webp"
 coverImageW: 1983
@@ -10,21 +10,45 @@ publishedAt: "2026-08-09"
 tags: ["PostgreSQL", "Indexing", "Performance", "Production Incident"]
 ---
 
-You always heard that once you add the right index, a query gets fast and stays fast, right? I believed that too, until `log_impression`, the RPC that logs every image impression on PixEarn, started throwing `57014: canceling statement due to statement timeout` in production, on a table that already had the index matching the query.
+I used to think that once I added the right index, the query would get fast and stay fast.
 
-This isn't a cold path. Every scroll, open, or search click fires this RPC, which dedupes the event, inserts it, and bumps a counter, in batches of 5 to 35 depending on device. `pg_stat_statements` showed it running around 1.4 million times, averaging 200 to 300ms, with spikes past 7 seconds. Past `statement_timeout`, Postgres kills the statement, caller gets a 500, impression silently dropped.
+Then one day, `log_impression`, the RPC that logs every image impression on PixEarn, started throwing this error in production:
 
-`analytics.impressions` already had an index on `ref_id`, and a composite one on `(ref_id, created_at DESC)`. The query filters by `ref_id`, exactly what the composite leads with. My first thought: wait, I already have the index that matches this query, why is this happening.
+`57014: canceling statement due to statement timeout`
+
+Every scroll, open, or search click calls this RPC. It checks whether the impression is a duplicate, inserts it, and updates a counter. Depending on the device, it handles batches of 5 to 35.
+
+At the time, this RPC was getting around 5.5 million calls a month.
+
+When I checked `pg_stat_statements`, the average was around 200 to 300ms. But some calls were taking more than 7 seconds.
+
+Once a call crossed `statement_timeout`, Postgres cancelled it. The caller got a 500 response, and the impression didn't get recorded.
+
+But `analytics.impressions` already had an index on `ref_id` and a composite index on `(ref_id, created_at DESC)`.
+
+My first thought was, I already have the index that matches this query. Why is this still happening?
 
 ## What I thought was going on
 
-My assumption: the `created_at` half of the composite index let Postgres bound "did this viewer already see this image in the last 5 minutes" by time, once `ref_id` narrowed things down. Held fine while the table was small.
+The query filters by `ref_id` first, which is also the first column in the composite index.
 
-The first real crack showed up somewhere else: a nightly rollup job scans by date across every image, not one at a time, and `(ref_id, created_at)` can't serve that — leftmost prefix, a composite index only works efficiently from its leading column inward. I added standalone `created_at` indexes for that job, a real fix, but it never touched the RPC's timeout. That RPC filters by `ref_id` first; its actual problem was what happened to `created_at` after `ref_id` had already narrowed things down, and I hadn't looked there yet.
+I assumed Postgres would use `ref_id` to find the image's impressions, then use `created_at` to check whether the same viewer had seen it in the last 5 minutes.
+
+That seemed to work while the table was small.
+
+But the first issue I found was somewhere else.
+
+A nightly rollup job was scanning impressions by date across all images. The composite index started with `ref_id`, so it couldn't efficiently serve that query. This is the leftmost prefix rule: the order of the columns matters when using a composite index.
+
+So I added standalone `created_at` indexes for that job.
+
+It helped the rollup, but the RPC was still timing out.
+
+The RPC already filtered by `ref_id` first. I still needed to check what happened to `created_at` after that.
 
 ## Where it actually broke
 
-The dedup guard inside `log_impression`, a `SECURITY DEFINER` function:
+Inside `log_impression`, a `SECURITY DEFINER` function, I had this check to avoid duplicate impressions:
 
 ```sql
 filtered_images AS (
@@ -41,19 +65,35 @@ filtered_images AS (
 )
 ```
 
-Skip logging if this viewer already logged an impression for this image, same source, last 5 minutes. Stops a page reload from counting as five views instead of one. Simple intent, and `ref_id` equality did its job fine. The line that broke it was this one:
+The idea was simple.
+
+If the same viewer had already logged an impression for this image, from the same source, in the last 5 minutes, skip it. A page reload shouldn't turn one view into five.
+
+The `ref_id` check was working properly. But this line was the problem:
 
 ```sql
 now() < ie.created_at + interval '5 minutes'
 ```
 
-`created_at` isn't bare — it's inside `created_at + interval '5 minutes'`. Postgres can't use an index on a column as a range bound once that column is wrapped in an expression.
+I was adding 5 minutes to `created_at` before comparing it with `now()`.
+
+Because of that expression, Postgres couldn't use `created_at` as the time boundary in the index scan.
 
 <Callout kind="warn">
-  This is **sargability**: the indexed column has to sit alone on one side of the comparison for the planner to use the index as a boundary. Wrap it in arithmetic, and the planner evaluates that arithmetic per row instead.
+  This is **sargability**. Keeping the indexed column alone on one side of
+  this comparison lets Postgres use it as an index boundary. With the addition
+  around `created_at`, it had to evaluate the expression for each candidate row.
 </Callout>
 
-So per call, Postgres found every row for that `ref_id`, then had no time shortcut — it walked the entire history for that image until it found a match or ran out. Most images have no recent duplicate most of the time, so it checked the *whole* history before concluding "no match, insert." Fine at a hundred rows. Not fine once the table passed roughly 5.9 million rows and popular images had long histories to hand-check on every view, at 1.4M calls. The `created_at` index never mattered — the query never let the planner use it as a bound.
+So Postgres found the rows for that `ref_id`, then went through the image's history until it found a matching impression or reached the end.
+
+Most of the time, there was no recent duplicate. So it checked the whole history before deciding to insert a new impression.
+
+With a hundred rows, that wasn't a big problem.
+
+But the table had grown to around 5.9 million rows. Popular images had a long history of impressions, and the RPC was handling around 5.5 million calls a month.
+
+The index was there. But the way I wrote the condition didn't let Postgres use `created_at` to limit that work.
 
 ## The rewrite
 
@@ -65,9 +105,13 @@ now() < ie.created_at + interval '5 minutes'
 ie.created_at > now() - interval '5 minutes'
 ```
 
-Same condition, different shape. `now()` evaluates once per statement, a constant to the planner. With `created_at` bare, Postgres uses it directly as an index bound: start at "5 minutes ago," stop once rows fall outside the window.
+The condition still meant the same thing. I just moved the calculation to the other side.
 
-The actual lesson isn't "add an index." It's that an index existing and an index the planner can *use* are two different things.
+`now()` gives a fixed value for the comparison. With `created_at` alone, Postgres could use the index to check only the rows within the last 5 minutes.
+
+That was the part I had missed.
+
+I had checked whether the index existed. But I hadn't checked whether the query let Postgres use it properly.
 
 ## The indexes I added alongside it
 
@@ -81,21 +125,43 @@ CREATE INDEX IF NOT EXISTS idx_ie_anon_dedup
   WHERE anon_id IS NOT NULL;
 ```
 
-The dedup check also filters on `come_from` and whichever identity field applies — `actor_id` for logged-in users, `anon_id` for anonymous, only one per call. The old composite covered just `ref_id` and `created_at`, so even sargable, Postgres still hit the heap for every candidate row to check the rest. These cover all four columns the check needs, partial because a row only ever has one identity field set, never both.
+The duplicate check also uses `come_from` and the viewer's identity. For logged-in users, it uses `actor_id`. For anonymous users, it uses `anon_id`. Only one applies per call.
 
-I also added `DISTINCT` to the `valid_images` CTE, which honestly fixes nothing — `image_id` is the primary key so duplicate ids in the array can't produce duplicate rows. Someone flagged it as a possible bug in review; it didn't hold up against the schema, but I left `DISTINCT` in anyway since it costs nothing.
+The old composite index only covered `ref_id` and `created_at`. Even after rewriting the condition, Postgres still needed to read the table rows to check the other fields.
+
+These indexes cover all four columns needed for each check. They are partial indexes because a row only has one identity field set, never both.
+
+I also added `DISTINCT` to the `valid_images` CTE after someone raised duplicate IDs as a possible bug during review.
+
+But after checking the schema, I realised that `image_id` was already the primary key. Repeated IDs in the input array couldn't produce duplicate rows there.
+
+So `DISTINCT` didn't fix anything. I left it in, but it wasn't part of what solved the timeout.
 
 ## Why CONCURRENTLY, and why it's annoying
 
-`analytics.impressions` takes live writes at the same 1.4M-call scale that caused the outage. A plain `CREATE INDEX` locks the table for the whole build — invisible on a small table, but this one would've caused its own outage while fixing the first. `CREATE INDEX CONCURRENTLY` avoids that lock, at the cost of a slower build that can fail partway and leave an invalid index behind, but it's the only responsible option here.
+The table was still receiving live writes while I worked on the fix.
+
+At around 5.5 million RPC calls a month, I couldn't ignore what would happen while building the indexes.
+
+A plain `CREATE INDEX` would block writes for the whole build. On a small table, I might not notice it much. But on this table, it could cause another outage.
+
+So I used `CREATE INDEX CONCURRENTLY` to keep writes going during the build.
+
+It takes longer, and if the build fails partway, it can leave an invalid index behind. But I needed the table to keep accepting writes.
 
 <Callout kind="tip">
-  The annoying part is tooling, not Postgres: `CONCURRENTLY` can't run inside a transaction, and `supabase db push` wraps every migration in one. So I ran the `CONCURRENTLY` statements by hand against production, then pushed a migration with a plain `CREATE INDEX IF NOT EXISTS` — a no-op in prod that just keeps dev, staging, and migration history in sync.
+  `CONCURRENTLY` can't run inside a transaction, and `supabase db push` wrapped
+  the migration in one. So I ran the `CONCURRENTLY` statements manually against
+  production, then pushed a migration with plain `CREATE INDEX IF NOT EXISTS`.
+  The indexes already existed in production, so the migration did nothing there.
+  It kept dev, staging, and the migration history in sync.
 </Callout>
 
 ## The retry loop that made it worse
 
-Separate problem, in the client. `flushImpressions` requeued an entire failed batch back onto the buffer on every error, uncapped:
+While checking this, I also found a problem in the client.
+
+Whenever `flushImpressions` failed, it put the entire batch back into the buffer. There was no limit:
 
 ```ts
 } catch (err) {
@@ -103,22 +169,38 @@ Separate problem, in the client. `flushImpressions` requeued an entire failed ba
 }
 ```
 
-Once the RPC started timing out, this became a loop: slow query, failed batch, requeued uncapped, bigger next flush, more load on an already struggling RPC. One timeout made the next attempt strictly worse.
+Once the RPC started timing out, the failed batch went back into the buffer. New impressions kept coming in, so the next flush became bigger.
+
+That put even more load on the same RPC that was already struggling.
+
+One timeout was making the next attempt worse.
+
+So I added two limits:
 
 ```ts
 const MAX_IMPRESSION_BATCH_SIZE = 40;
 const MAX_IMPRESSION_RETRIES = 3;
 ```
 
-Capped both sides: 40 ids max per flush, dropped instead of requeued after 3 failures. A slow query rarely stays contained to the database — if the caller retries naively, it becomes a load problem, which becomes a bigger database problem.
+Each flush could send a maximum of 40 IDs. After 3 failures, the batch was dropped instead of being added back again.
+
+The slow query was one problem. The retry loop was adding more work every time that query failed.
 
 ## How I actually checked this was fixed
 
-I didn't want to trust one `EXPLAIN ANALYZE` run. `log_impression` does real inserts and an upsert, so running it directly needs `BEGIN; ... ROLLBACK;` just to be safe, and even then a single run happens in an empty session with no concurrent traffic — it shows the plan shape, not what happens at real call volume against millions of rows.
+I didn't want to decide that everything was fixed after one `EXPLAIN ANALYZE` run.
 
-What I actually used was `pg_stat_statements`, the same tool that surfaced the original 200 to 300ms average with 7 second spikes. Ran it again post-deploy to see if that pattern was gone under real traffic.
+`log_impression` does real inserts and an upsert. So when running it directly, I needed `BEGIN; ... ROLLBACK;` to avoid keeping those writes.
 
-But wait, I don't want to oversell this. It tells you *that* something got faster, not always *why* — I already had the why from reading the query. And 90 minutes of clean traffic is encouraging, not proof; the original problem took 1.4 million calls to become obvious. I want a full day, peaks and quiet periods included, before I call this closed.
+And even then, one run in an empty session wouldn't show what happens when many calls arrive together against millions of rows. It could show the query plan, but I also needed to check real traffic.
+
+So after deploying the fix, I checked `pg_stat_statements` again. This was the same tool that had shown the 200 to 300ms average and spikes past 7 seconds.
+
+It helped me check whether that pattern was still happening under real traffic. But the statistics alone couldn't explain why something got faster. I had already understood that part by reading the query.
+
+The first 90 minutes of clean traffic were encouraging.
+
+But I still wanted to watch a full day, including busy and quiet periods, before calling the issue closed.
 
 ## What's still not fixed
 
@@ -132,13 +214,26 @@ ON CONFLICT (ref_id) DO UPDATE
       last_updated_at = now()
 ```
 
-Fine at normal traffic. Becomes a contention point on a popular or viral image, because every concurrent viewer updates the exact same row, and Postgres serializes that: one transaction holds the lock, everyone else touching that `ref_id` queues behind it. `statement_timeout` counts time waiting on a lock as execution time, so a queued transaction can get canceled purely from waiting its turn — no actual work being the bottleneck.
+This works under normal traffic. But when an image becomes popular or goes viral, many viewers try to update the same row at the same time.
 
-Haven't shipped anything for this — a different mechanism entirely from the sargability fix. The real fix is decoupling the counter from the request path: log the event, let a periodic batch job aggregate counts on an interval, the pattern that already exists for other rollups. Still just a plan as of writing.
+One transaction holds the lock, and the others updating that `ref_id` have to wait.
+
+That waiting time also counts towards `statement_timeout`. So a transaction can get cancelled while waiting for the lock, even if the query itself doesn't have much work to do.
+
+I haven't shipped a fix for this yet. Rewriting the time condition doesn't solve the row lock problem.
+
+My plan is to log the impression during the request, then let a periodic batch job update the counts. I already use that pattern for other rollups.
+
+But as of writing this, it's still a plan.
 
 ## Takeaways
 
-- An index existing and an index the planner can actually *use* are two different things — check sargability, not just presence.
-- `EXPLAIN` still shows the index being touched for whatever part of the predicate it *can* use, which hides the fact that the part that matters isn't sargable at all.
-- Nothing about the query changed as it got slower — only the row count did. Indexes that "worked" at low volume can silently stop mattering.
-- A slow database call rarely stays isolated: an uncapped retry loop turned one timeout into a load spike all on its own.
+Looking back, the query hadn't changed. The number of rows had.
+
+The same query that seemed fine on a small table became a problem as the data grew.
+
+I also learned that seeing an index in `EXPLAIN` isn't enough. Postgres can use one part of an index while still checking far more rows than I expected because another condition can't use it.
+
+And the problem didn't stay in the database. The client kept retrying failed batches without a limit, which added more load every time something went wrong.
+
+Now, when I check a slow query, I look at how the query uses the index, how much data it needs to check, and what the caller does when it fails.

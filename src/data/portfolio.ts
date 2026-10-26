@@ -669,7 +669,7 @@ export const PORTFOLIO_DATA: PortfolioData = {
         },
         {
           title: "Sargable predicate + CREATE INDEX CONCURRENTLY on a hot table",
-          why: "log_impression threw 57014 statement timeouts at 1.4M calls a day on a ~5.9M-row table that already had a matching index.",
+          why: "log_impression threw 57014 statement timeouts at 5.5M calls a month on a ~5.9M-row table that already had a matching index.",
           approach:
             "Rewrote the predicate so created_at stayed bare and usable as an index bound, built indexes with CREATE INDEX CONCURRENTLY by hand (the migration tool wraps everything in a transaction) and mirrored them with an IF NOT EXISTS migration, then capped the client retry loop at 40 ids per flush and 3 retries.",
           tradeoff:
